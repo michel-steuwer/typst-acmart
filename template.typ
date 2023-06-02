@@ -221,6 +221,9 @@
     https:\/\/doi.org\/#acmDOI
   ])
 
+  set par(justify: true, first-line-indent: 0.65em)
+  show par: set block(below: 0.65em)
+
   // Display content
   body
 }
