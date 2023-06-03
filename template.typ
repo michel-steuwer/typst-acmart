@@ -137,9 +137,9 @@
   )
 
   set text(font: mainFont, size: 10pt)
-  set par(justify: true)
+  set par(justify: true, leading: 0.555em)
 
-  set heading(numbering: "1")
+  set heading(numbering: (..n) => [#n.pos().first()~~~])
   show heading: it => {
     set text(font: sfFont, size: 10pt, weight: "bold")
     upper(it)
@@ -159,7 +159,7 @@
     let displayAffiliation(affiliation) = [,#text(font: mainFont, size: 9pt)[
       #affiliation.institution, #affiliation.country]\
     ]
-    par(leading: 0.5em,{
+    par({
       let affiliation = none
       let currentAuthors = ()
       for author in authors {
@@ -178,10 +178,10 @@
   }
 
   // Display abstract
-  par(leading: 0.5em, text(size: 9pt, abstract))
+  par(text(size: 9pt, abstract))
 
   // Display CSS concepts:
-  par(leading: 0.5em, text(size: 9pt)[CCS Concepts: #{
+  par(text(size: 9pt)[CCS Concepts: #{
     ccs.fold((), (acc, concept) => {
       acc + ([
         #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
@@ -202,11 +202,11 @@
   }])
 
   // Display keywords
-  par(leading: 0.5em, text(size: 9pt)[
+  par(text(size: 9pt)[
     Additional Key Words and Phrases: #keywords.join(", ")])
 
   // Display ACM reference format
-  par(leading: 0.65em, text(size: 9pt)[
+  par(text(size: 9pt)[
     #strong[ACM Reference Format:]\
     #authors.map(author => author.name).join(", ", last: " and ").
     #acmYear.
@@ -221,7 +221,9 @@
     https:\/\/doi.org\/#acmDOI
   ])
 
-  set par(justify: true, first-line-indent: 0.65em)
+  set par(
+    justify: true,
+    first-line-indent: 0.65em)
   show par: set block(below: 0.65em)
 
   // Display content
