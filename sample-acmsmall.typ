@@ -103,7 +103,7 @@
   acmJournal: "JACM",
   acmVolume: 37,
   acmNumber: 4,
-  acmArticle: 111,
+  acmArticle: 1,
   acmMonth: 8,
 
   acmYear: 2018,

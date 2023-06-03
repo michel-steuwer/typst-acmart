@@ -75,6 +75,8 @@
   // Set document metadata
   set document(title: title, author: authors.map(author => author.name))
 
+  set text(fill: blue)
+
   // Configure the page.
   set page(
     width:  6.75in,
@@ -92,20 +94,22 @@
         
       } else  {
         let acmArticlePage = [#acmArticle:#counter(page).display()]
-        block(
-          fill: gray,
-          height: 13pt,
-          width: 100%,
-          if calc.rem(currentpage, 2) == 0 [
-            #acmArticlePage
-            #h(1fr)
-            #shortauthors
-          ] else [
-            #shorttitle
-            #h(1fr)
-            #acmArticlePage
-          ]
-        )
+        [
+          #block(
+            height: 10pt,
+            width: 100%, 
+            if calc.rem(currentpage, 2) == 0 [
+              #acmArticlePage
+              #h(1fr)
+              #shortauthors
+            ] else [
+              #shorttitle
+              #h(1fr)
+              #acmArticlePage
+            ]
+          )
+          #v(17pt)
+        ]
       }
     }),
     header-ascent: 0%,
@@ -114,117 +118,130 @@
       let currentpage = loc.page()
       if currentpage == 1 {
         
-      } else  {
-        let currentfooting = [
-            #journal.nameShort,
-            Vol. #acmVolume,
-            No. #acmNumber,
-            Article #acmArticle.
-            Publication date: #displayMonth(acmMonth) #acmYear.
-          ]
-        block(
-          height: 24pt,
-          width: 100%,
-          if calc.rem(currentpage, 2) == 0 {
-            align(left, currentfooting)
-           } else {
-            align(right, currentfooting)
-           }
-        )
       }
+      let currentfooting = [
+          #journal.nameShort,
+          Vol. #acmVolume,
+          No. #acmNumber,
+          Article #acmArticle.
+          Publication date: #displayMonth(acmMonth) #acmYear.
+        ]
+      block(
+        height: 24pt,
+        width: 100%,
+        if calc.rem(currentpage, 2) == 0 {
+          align(bottom + left, currentfooting)
+          } else {
+          align(bottom + right, currentfooting)
+          }
+      )
     }),
     footer-descent: 0%,
   )
 
   set text(font: mainFont, size: 10pt)
-  set par(justify: true, leading: 0.555em)
+  
+  // set titlepage
+  {
+    set par(justify: true, leading: 0.555em)
+    show par: set block(below: 0pt)
+
+    // Display title
+    {
+      set text(font: sfFont, size: 14.4pt, weight: "bold")
+      par(title)
+      v(16.5pt)
+    }
+
+    // Display authors
+    {
+      set par(leading: 5.7pt)
+      let displayAuthor(author) = [#text(font: sfFont, size: 11pt, upper(author.name))]
+      let displayAuthors(authors) = authors.map(displayAuthor).join(", ", last: " and ")
+
+      let displayAffiliation(affiliation) = [,#text(font: mainFont, size: 9pt)[
+        #affiliation.institution, #affiliation.country]\
+      ]
+      par({
+        let affiliation = none
+        let currentAuthors = ()
+        for author in authors {
+          // if affiliation changes, print author list and affiliation
+          if author.affiliation != affiliation and affiliation != none {
+            displayAuthors(currentAuthors)
+            displayAffiliation(affiliation)
+            currentAuthors = ()
+          }
+          currentAuthors.push(author)
+          affiliation = author.affiliation
+        }
+        displayAuthors(currentAuthors)
+        displayAffiliation(affiliation)
+      })
+      v(12pt)
+    }
+
+    // Display abstract
+    par(text(size: 9pt, abstract))
+    v(9.5pt)
+
+    // Display CSS concepts:
+    par(text(size: 9pt)[CCS Concepts: #{
+      ccs.fold((), (acc, concept) => {
+        acc + ([
+          #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
+          #strong(concept.at(0))
+          #sym.arrow.r
+          #{concept.at(1).fold((), (acc, subconcept) => {
+              acc + (if subconcept.at(0) >= 500 {
+                [ *#subconcept.at(1)*]
+              } else if subconcept.at(0) >= 300 {
+                [ _#subconcept.at(1)_]
+              } else {
+                [ #subconcept.at(1)]
+              }, )
+            }).join(";")
+          }],)
+      }).join(";")
+      "."
+    }])
+    v(9.5pt)
+
+    // Display keywords
+    par(text(size: 9pt)[
+      Additional Key Words and Phrases: #keywords.join(", ")])
+    v(9.5pt)
+
+    // Display ACM reference format
+    par(text(size: 9pt)[
+      #strong[ACM Reference Format:]\
+      #authors.map(author => author.name).join(", ", last: " and ").
+      #acmYear.
+      #title.
+      #emph(journal.nameShort)
+      #acmVolume,
+      #acmNumber,
+      Article #acmArticle (#displayMonth(acmMonth) #acmYear),
+      #counter(page).display((..nums) => [
+        #nums.pos().last() page#if(nums.pos().last() > 1) { [s] }.
+      ],both: true)
+      https:\/\/doi.org\/#acmDOI
+    ])
+    v(1pt)
+  }
 
   set heading(numbering: (..n) => [#n.pos().first()~~~])
   show heading: it => {
     set text(font: sfFont, size: 10pt, weight: "bold")
     upper(it)
+    v(9pt - 0.555em)
   }
-
-  // Display title
-  {
-    set text(font: sfFont, size: 14.4pt, weight: "bold")
-    par(title)
-  }
-
-  // Display authors
-  {
-    let displayAuthor(author) = [#text(font: sfFont, size: 12pt, upper(author.name))]
-    let displayAuthors(authors) = authors.map(displayAuthor).join(", ", last: " and ")
-
-    let displayAffiliation(affiliation) = [,#text(font: mainFont, size: 9pt)[
-      #affiliation.institution, #affiliation.country]\
-    ]
-    par({
-      let affiliation = none
-      let currentAuthors = ()
-      for author in authors {
-         // if affiliation changes, print author list and affiliation
-        if author.affiliation != affiliation and affiliation != none {
-          displayAuthors(currentAuthors)
-          displayAffiliation(affiliation)
-          currentAuthors = ()
-        }
-        currentAuthors.push(author)
-        affiliation = author.affiliation
-      }
-      displayAuthors(currentAuthors)
-      displayAffiliation(affiliation)
-    })
-  }
-
-  // Display abstract
-  par(text(size: 9pt, abstract))
-
-  // Display CSS concepts:
-  par(text(size: 9pt)[CCS Concepts: #{
-    ccs.fold((), (acc, concept) => {
-      acc + ([
-        #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
-        #strong(concept.at(0))
-        #sym.arrow.r
-        #{concept.at(1).fold((), (acc, subconcept) => {
-            acc + (if subconcept.at(0) >= 500 {
-              [ *#subconcept.at(1)*]
-            } else if subconcept.at(0) >= 300 {
-              [ _#subconcept.at(1)_]
-            } else {
-              [ #subconcept.at(1)]
-            }, )
-          }).join(";")
-        }],)
-    }).join(";")
-    "."
-  }])
-
-  // Display keywords
-  par(text(size: 9pt)[
-    Additional Key Words and Phrases: #keywords.join(", ")])
-
-  // Display ACM reference format
-  par(text(size: 9pt)[
-    #strong[ACM Reference Format:]\
-    #authors.map(author => author.name).join(", ", last: " and ").
-    #acmYear.
-    #title.
-    #emph(journal.nameShort)
-    #acmVolume,
-    #acmNumber,
-    Article #acmArticle (#displayMonth(acmMonth) #acmYear),
-    #counter(page).display((..nums) => [
-      #nums.pos().last() page#if(nums.pos().last() > 1) { [s] }.
-    ],both: true)
-    https:\/\/doi.org\/#acmDOI
-  ])
 
   set par(
     justify: true,
-    first-line-indent: 0.65em)
-  show par: set block(below: 0.65em)
+    leading: 5.35pt,
+    first-line-indent: 9.5pt)
+  show par: set block(below: 5.35pt)
 
   // Display content
   body
