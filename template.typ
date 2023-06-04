@@ -83,7 +83,7 @@
     height: 10in,
     margin: (
       top: 58pt + 27pt,
-      bottom: 39pt + 24pt,
+      bottom: 39pt + 24pt + 100pt,
       left: 46pt,
       right: 46pt
     ),
@@ -117,7 +117,32 @@
       set text(size: 8pt)
       let currentpage = loc.page()
       if currentpage == 1 {
-        
+        [
+          Authors' addresses: #{
+            authors.fold((), (list, author) => {
+              list + (
+                [#author.name#{
+                  if author.at("email", default: none) != none [, #author.email]
+                  
+                }]
+              ,)
+            }).join("; ", last: ".")
+          }
+
+          Permission to make digital or hard copies of all or part of this
+          work for personal or classroom use is granted without fee provided
+          that copies are not made or distributed for profit or commercial
+          advantage and that copies bear this notice and the full citation on
+          the first page. Copyrights for components of this work owned by
+          others than ACM must be honored. Abstracting with credit is
+          permitted. To copy otherwise, or republish, to post on servers or to
+          redistribute to lists, requires prior specific permission
+          and#h(.5pt)/or  a fee. Request permissions from
+          permissions\@acm.org.\
+          #sym.copyright #acmYear Association for Computing Machinery\
+          0004-5411/2018/8-ART1 \$15.00\
+          https:\/\/doi.org\/#acmDOI
+        ]
       }
       let currentfooting = [
           #journal.nameShort,
@@ -129,6 +154,7 @@
       block(
         height: 24pt,
         width: 100%,
+        fill: gray,
         if calc.rem(currentpage, 2) == 0 {
           align(bottom + left, currentfooting)
           } else {
@@ -243,6 +269,21 @@
     first-line-indent: 9.5pt)
   show par: set block(below: 5.35pt)
 
+  // set page(
+  //   margin: (
+  //     top: 58pt + 27pt,
+  //     bottom: 39pt + 24pt,
+  //     left: 46pt,
+  //     right: 46pt
+  //   ),
+  // )
+
   // Display content
   body
+
+  // [
+  // #locate( loc => { let x = 39pt + 24pt; type(x) })
+
+  // #locate( loc => 39pt + 24pt)
+  // ]
 }
