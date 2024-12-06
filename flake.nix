@@ -21,6 +21,8 @@
               typst
               diff-pdf
               libertine
+              watchexec
+              just
             ];
             FONTCONFIG_FILE = makeFontsConf {
               fontDirectories = [libertine];
