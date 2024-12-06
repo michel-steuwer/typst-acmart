@@ -82,14 +82,14 @@
     width:  6.75in,
     height: 10in,
     margin: (
-      top: 58pt + 27pt,
-      bottom: 39pt + 24pt + 100pt,
-      left: 46pt,
-      right: 46pt
+      top:    58pt + 27pt,
+      bottom: 39pt + 24pt,
+      left:   46pt,
+      right:  46pt
     ),
-    header: locate(loc => {
+    header: context {
       set text(size: 8pt, font: sfFont)
-      let currentpage = loc.page()
+      let (currentpage,) = counter(page).get()
       if currentpage == 1 {
         
       } else  {
@@ -111,39 +111,11 @@
           #v(17pt)
         ]
       }
-    }),
+    },
     header-ascent: 0%,
-    footer: locate(loc => {
+    footer: context {
       set text(size: 8pt)
-      let currentpage = loc.page()
-      if currentpage == 1 {
-        [
-          Authors' addresses: #{
-            authors.fold((), (list, author) => {
-              list + (
-                [#author.name#{
-                  if author.at("email", default: none) != none [, #author.email]
-                  
-                }]
-              ,)
-            }).join("; ", last: ".")
-          }
-
-          Permission to make digital or hard copies of all or part of this
-          work for personal or classroom use is granted without fee provided
-          that copies are not made or distributed for profit or commercial
-          advantage and that copies bear this notice and the full citation on
-          the first page. Copyrights for components of this work owned by
-          others than ACM must be honored. Abstracting with credit is
-          permitted. To copy otherwise, or republish, to post on servers or to
-          redistribute to lists, requires prior specific permission
-          and#h(.5pt)/or  a fee. Request permissions from
-          permissions\@acm.org.\
-          #sym.copyright #acmYear Association for Computing Machinery\
-          0004-5411/2018/8-ART1 \$15.00\
-          https:\/\/doi.org\/#acmDOI
-        ]
-      }
+      let (currentpage,) = counter(page).get()
       let currentfooting = [
           #journal.nameShort,
           Vol. #acmVolume,
@@ -154,14 +126,13 @@
       block(
         height: 24pt,
         width: 100%,
-        fill: gray,
         if calc.rem(currentpage, 2) == 0 {
           align(bottom + left, currentfooting)
           } else {
           align(bottom + right, currentfooting)
           }
       )
-    }),
+    },
     footer-descent: 0%,
   )
 
@@ -169,8 +140,7 @@
   
   // set titlepage
   {
-    set par(justify: true, leading: 0.555em)
-    show par: set block(below: 0pt)
+    set par(justify: true, leading: 0.555em, spacing: 0pt)
 
     // Display title
     {
@@ -239,7 +209,7 @@
     v(9.5pt)
 
     // Display ACM reference format
-    par(text(size: 9pt)[
+    par(text(size: 9pt, context [
       #strong[ACM Reference Format:]\
       #authors.map(author => author.name).join(", ", last: " and ").
       #acmYear.
@@ -252,8 +222,38 @@
         #nums.pos().last() page#if(nums.pos().last() > 1) { [s] }.
       ],both: true)
       https:\/\/doi.org\/#acmDOI
-    ])
+    ]))
     v(1pt)
+
+    // place footer
+    set text(size: 8pt)
+    place(bottom, float: true)[
+          #block[Authors' addresses: #{
+            authors.fold((), (list, author) => {
+              list + (
+                [#author.name#{
+                  if author.at("email", default: none) != none [, #author.email]
+                  
+                }]
+              ,)
+            }).join("; ", last: ".")
+          }]
+          #v(1em)
+
+          Permission to make digital or hard copies of all or part of this
+          work for personal or classroom use is granted without fee provided
+          that copies are not made or distributed for profit or commercial
+          advantage and that copies bear this notice and the full citation on
+          the first page. Copyrights for components of this work owned by
+          others than ACM must be honored. Abstracting with credit is
+          permitted. To copy otherwise, or republish, to post on servers or to
+          redistribute to lists, requires prior specific permission
+          and#h(.5pt)/or  a fee. Request permissions from
+          permissions\@acm.org.\
+          #sym.copyright #acmYear Association for Computing Machinery\
+          0004-5411/2018/8-ART1 \$15.00\
+          https:\/\/doi.org\/#acmDOI
+        ]
   }
 
   set heading(numbering: (..n) => [#n.pos().first()~~~])
@@ -266,8 +266,9 @@
   set par(
     justify: true,
     leading: 5.35pt,
-    first-line-indent: 9.5pt)
-  show par: set block(below: 5.35pt)
+    first-line-indent: 9.5pt,
+    spacing: 5.35pt)
+  // show par: set block(below: 5.35pt)
 
   // set page(
   //   margin: (
