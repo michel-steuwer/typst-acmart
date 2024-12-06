@@ -1,0 +1,28 @@
+name: "Diff sample-acmsmall.pdf with ours"
+on:
+  pull_request:
+  push:
+jobs:
+  diff-pdfs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - uses: nicknovitski/nix-develop@v1
+
+      - name: Compile ours
+        run: typst compile sample-typst-acmsmall.typ
+
+      - name: Diff the PDFs
+        run: xvfb-run diff-pdf --output-diff=diff.pdf sample-acmsmall.pdf sample-typst-acmsmall.pdf || true
+
+      - name: Upload PDF diff as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-diff
+          path: diff.pdf
