@@ -19,8 +19,16 @@
   authors: (),
   shortauthors: none,
   abstract: none,
-  ccs: none,
-  keywords: none,
+  ccs: (
+    ([Do Not Use This Code], (
+        (500, [Generate the Correct Terms for Your Paper]),
+        (300, [Generate the Correct Terms for Your Paper]),
+        (100, [Generate the Correct Terms for Your Paper]),
+        (100, [Generate the Correct Terms for Your Paper]))),
+  ),
+  keywords:
+    ("Do", "not", "Us", "This", "Code", "Put", "the",
+     "Correct", "Terms", "for", "Your", "Paper"),
 
   // acm journal
   acmJournal: none,
@@ -74,8 +82,6 @@
 
   // Set document metadata
   set document(title: title, author: authors.map(author => author.name))
-
-  set text(fill: blue)
 
   // Configure the page.
   set page(
@@ -178,35 +184,41 @@
     }
 
     // Display abstract
-    par(text(size: 9pt, abstract))
-    v(9.5pt)
+    if abstract != none {
+      par(text(size: 9pt, abstract))
+      v(9.5pt)
+    }
 
     // Display CSS concepts:
-    par(text(size: 9pt)[CCS Concepts: #{
-      ccs.fold((), (acc, concept) => {
-        acc + ([
-          #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
-          #strong(concept.at(0))
-          #sym.arrow.r
-          #{concept.at(1).fold((), (acc, subconcept) => {
-              acc + (if subconcept.at(0) >= 500 {
-                [ *#subconcept.at(1)*]
-              } else if subconcept.at(0) >= 300 {
-                [ _#subconcept.at(1)_]
-              } else {
-                [ #subconcept.at(1)]
-              }, )
-            }).join(";")
-          }],)
-      }).join(";")
-      "."
-    }])
-    v(9.5pt)
+    if ccs != none {
+      par(text(size: 9pt)[CCS Concepts: #{
+        ccs.fold((), (acc, concept) => {
+          acc + ([
+            #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
+            #strong(concept.at(0))
+            #sym.arrow.r
+            #{concept.at(1).fold((), (acc, subconcept) => {
+                acc + (if subconcept.at(0) >= 500 {
+                  [ *#subconcept.at(1)*]
+                } else if subconcept.at(0) >= 300 {
+                  [ _#subconcept.at(1)_]
+                } else {
+                  [ #subconcept.at(1)]
+                }, )
+              }).join(";")
+            }],)
+        }).join(";")
+        "."
+      }])
+      v(9.5pt)
+    }
 
     // Display keywords
-    par(text(size: 9pt)[
-      Additional Key Words and Phrases: #keywords.join(", ")])
-    v(9.5pt)
+    if keywords != none {
+      par(text(size: 9pt)[
+        Additional Key Words and Phrases: #keywords.join(", ")])
+      v(9.5pt)
+    }
 
     // Display ACM reference format
     par(text(size: 9pt, context [
@@ -228,32 +240,50 @@
     // place footer
     set text(size: 8pt)
     place(bottom, float: true)[
-          #block[Authors' addresses: #{
-            authors.fold((), (list, author) => {
-              list + (
-                [#author.name#{
-                  if author.at("email", default: none) != none [, #author.email]
-                  
-                }]
-              ,)
-            }).join("; ", last: ".")
-          }]
-          #v(1em)
+      #block[Authors' Contact Information: #{
+        let displayAuthor(author) = [#author.name#{
+          if author.at("email", default: none) != none [, #author.email]
+        }]
+        let displayAuthors(authors) = authors.map(displayAuthor).join("; ")
+        let displayAffiliation(affiliation) = [#{
+          if affiliation.at("institution", default: none) != none [, #affiliation.institution]
+          if affiliation.at("city", default: none) != none [, #affiliation.city]
+          if affiliation.at("state", default: none) != none [, #affiliation.state]
+          if affiliation.at("country", default: none) != none [, #affiliation.country]
+        }]
 
-          Permission to make digital or hard copies of all or part of this
-          work for personal or classroom use is granted without fee provided
-          that copies are not made or distributed for profit or commercial
-          advantage and that copies bear this notice and the full citation on
-          the first page. Copyrights for components of this work owned by
-          others than ACM must be honored. Abstracting with credit is
-          permitted. To copy otherwise, or republish, to post on servers or to
-          redistribute to lists, requires prior specific permission
-          and#h(.5pt)/or  a fee. Request permissions from
-          permissions\@acm.org.\
-          #sym.copyright #acmYear Association for Computing Machinery\
-          0004-5411/2018/8-ART1 \$15.00\
-          https:\/\/doi.org\/#acmDOI
-        ]
+        let affiliation = none
+        let currentAuthors = ()
+
+        let output = ()
+        for author in authors {
+          // if affiliation changes, print author list and affiliation
+          if author.affiliation != affiliation and affiliation != none {
+            output.push(displayAuthors(currentAuthors) + displayAffiliation(affiliation))
+            currentAuthors = ()
+          }
+          currentAuthors.push(author)
+          affiliation = author.affiliation
+        }
+        output.push(displayAuthors(currentAuthors) + displayAffiliation(affiliation))
+        output.join("; ") + [.]
+      }]
+      #v(1em)
+
+      Permission to make digital or hard copies of all or part of this
+      work for personal or classroom use is granted without fee provided
+      that copies are not made or distributed for profit or commercial
+      advantage and that copies bear this notice and the full citation on
+      the first page. Copyrights for components of this work owned by
+      others than ACM must be honored. Abstracting with credit is
+      permitted. To copy otherwise, or republish, to post on servers or to
+      redistribute to lists, requires prior specific permission
+      and#h(.5pt)/or  a fee. Request permissions from
+      permissions\@acm.org.\
+      #sym.copyright #acmYear Copyright held by owner/author(s). Publication licensed to ACM.\
+      ACM 1557-735X/2028/8-ART111\
+      https:\/\/doi.org\/#acmDOI
+    ]
   }
 
   set heading(numbering: (..n) => [#n.pos().first()~~~])

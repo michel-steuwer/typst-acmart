@@ -83,22 +83,16 @@
     as many of the formatting elements an author may use in the
     preparation of the documentation of their work.
   ],
-  ccs: (
-    ([Computer systems organization], (
-        (500, [Embedded systems]),
-        (300, [Redundancy]),
-        (0,   [Robotics]))),
-    ([Networks], (
-        (100, [Network reliability]),))
-  ),
-  // (
-  //   (500,   ([Computer systems organization], [Embedded systems])),
-  //   (300,   ([Computer systems organization], [Redundancy])),
-  //   (none,  ([Computer systems organization], [Robotics])),
-  //   (100,   ([Networks], [Network reliability]))
+  // ccs: (
+  //   ([Computer systems organization], (
+  //       (500, [Embedded systems]),
+  //       (300, [Redundancy]),
+  //       (0,   [Robotics]))),
+  //   ([Networks], (
+  //       (100, [Network reliability]),))
   // ),
-  keywords: ("datasets", "neural networks", "gaze detection", "text tagging"),
-  copyright: "acmcopyright",
+  // keywords: ("datasets", "neural networks", "gaze detection", "text tagging"),
+  copyright: "acmlicensed",
 
   acmJournal: "JACM",
   acmVolume: 37,
