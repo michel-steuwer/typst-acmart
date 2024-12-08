@@ -71,7 +71,7 @@
         email: "jpkumquat@consortium.net",
         affiliation: (
           institution: "The Kumquat Consortium",
-          city: "New York",
+          // city: "New York", // disabled so that this fits onto one page ...
           country: "USA"))
   )},
   shortauthors: "Trovato et al.",
@@ -97,7 +97,7 @@
   acmJournal: "JACM",
   acmVolume: 37,
   acmNumber: 4,
-  acmArticle: 1,
+  acmArticle: 111,
   acmMonth: 8,
 
   acmYear: 2018,

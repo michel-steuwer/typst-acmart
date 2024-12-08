@@ -239,8 +239,12 @@
 
     // place footer
     set text(size: 8pt)
-    place(bottom, float: true)[
-      #block[Authors' Contact Information: #{
+    set par(leading: 0.6em)
+    place(bottom, float: true, clearance: .5em)[
+      #line(length: 100%, stroke: 0.4pt + black)
+      #v(.5em)
+      #par[#if authors.len() == 1 [Author's] else [Authors' as]
+      Contact Information: #{
         let displayAuthor(author) = [#author.name#{
           if author.at("email", default: none) != none [, #author.email]
         }]
@@ -268,8 +272,9 @@
         output.push(displayAuthors(currentAuthors) + displayAffiliation(affiliation))
         output.join("; ") + [.]
       }]
-      #v(1em)
-
+      #v(.9em)
+      #line(length: 100%, stroke: 0.4pt + black)
+      #v(.5em)
       Permission to make digital or hard copies of all or part of this
       work for personal or classroom use is granted without fee provided
       that copies are not made or distributed for profit or commercial
@@ -280,16 +285,17 @@
       redistribute to lists, requires prior specific permission
       and#h(.5pt)/or  a fee. Request permissions from
       permissions\@acm.org.\
-      #sym.copyright #acmYear Copyright held by owner/author(s). Publication licensed to ACM.\
-      ACM 1557-735X/2028/8-ART111\
+      #v(.75em)
+      #sym.copyright #acmYear Copyright held by the owner/author(s). Publication rights licensed to ACM.\
+      ACM 1557-735X/2028/8-ART#acmArticle\
       https:\/\/doi.org\/#acmDOI
     ]
   }
 
-  set heading(numbering: (..n) => [#n.pos().first()~~~])
+  set heading(numbering: (..n) => [#n.pos().first()#h(7pt)])
   show heading: it => {
     set text(font: sfFont, size: 10pt, weight: "bold")
-    upper(it)
+    it
     v(9pt - 0.555em)
   }
 
