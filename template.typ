@@ -11,7 +11,7 @@
   // Currently supported formats are:
   //  - acmsmall
   format: "acmsmall",
-  
+
   // Title, subtitle, authors, abstract, ACM ccs, keywords
   title: "Title",
   subtitle: none,
@@ -51,7 +51,7 @@
   let journal = if acmJournal == "JACM" {
     (
       name: "Journal of the ACM",
-      nameShort: "J. ACM"
+      nameShort: "J. ACM",
     )
   } else {
     none
@@ -69,7 +69,7 @@
     "September",
     "October",
     "November",
-    "December"
+    "December",
   ).at(month - 1)
 
   if shorttitle == none {
@@ -85,25 +85,25 @@
 
   // Configure the page.
   set page(
-    width:  6.75in,
+    width: 6.75in,
     height: 10in,
     margin: (
-      top:    58pt + 27pt,
+      top: 58pt + 27pt,
       bottom: 39pt + 24pt,
-      left:   46pt,
-      right:  46pt
+      left: 46pt,
+      right: 46pt,
     ),
     header: context {
       set text(size: 8pt, font: sfFont)
       let (currentpage,) = counter(page).get()
       if currentpage == 1 {
-        
-      } else  {
+
+      } else {
         let acmArticlePage = [#acmArticle:#counter(page).display()]
         [
           #block(
             height: 10pt,
-            width: 100%, 
+            width: 100%,
             if calc.rem(currentpage, 2) == 0 [
               #acmArticlePage
               #h(1fr)
@@ -112,7 +112,7 @@
               #shorttitle
               #h(1fr)
               #acmArticlePage
-            ]
+            ],
           )
           #v(17pt)
         ]
@@ -123,27 +123,27 @@
       set text(size: 8pt)
       let (currentpage,) = counter(page).get()
       let currentfooting = [
-          #journal.nameShort,
-          Vol. #acmVolume,
-          No. #acmNumber,
-          Article #acmArticle.
-          Publication date: #displayMonth(acmMonth) #acmYear.
-        ]
+        #journal.nameShort,
+        Vol. #acmVolume,
+        No. #acmNumber,
+        Article #acmArticle.
+        Publication date: #displayMonth(acmMonth) #acmYear.
+      ]
       block(
         height: 24pt,
         width: 100%,
         if calc.rem(currentpage, 2) == 0 {
           align(bottom + left, currentfooting)
-          } else {
+        } else {
           align(bottom + right, currentfooting)
-          }
+        },
       )
     },
     footer-descent: 0%,
   )
 
   set text(font: mainFont, size: 10pt)
-  
+
   // set titlepage
   {
     set par(justify: true, leading: 0.555em, spacing: 0pt)
@@ -158,10 +158,19 @@
     // Display authors
     {
       set par(leading: 5.7pt)
-      let displayAuthor(author) = [#text(font: sfFont, size: 11pt, upper(author.name))]
-      let displayAuthors(authors) = authors.map(displayAuthor).join(", ", last: " and ")
+      let displayAuthor(author) = [#text(
+          font: sfFont,
+          size: 11pt,
+          upper(author.name),
+        )]
+      let displayAuthors(authors) = authors.map(displayAuthor).join(
+        ", ",
+        last: " and ",
+      )
 
-      let displayAffiliation(affiliation) = [,#text(font: mainFont, size: 9pt)[
+      let displayAffiliation(
+        affiliation,
+      ) = [,#text(font: mainFont, size: 9pt)[
         #affiliation.institution, #affiliation.country]\
       ]
       par({
@@ -191,7 +200,8 @@
 
     // Display CSS concepts:
     if ccs != none {
-      par(text(size: 9pt)[CCS Concepts: #{
+      par(
+        text(size: 9pt)[CCS Concepts: #{
         ccs.fold((), (acc, concept) => {
           acc + ([
             #box(baseline: -50%, circle(radius: 1.25pt, fill: black))
@@ -209,32 +219,43 @@
             }],)
         }).join(";")
         "."
-      }])
+      }],
+      )
       v(9.5pt)
     }
 
     // Display keywords
     if keywords != none {
-      par(text(size: 9pt)[
-        Additional Key Words and Phrases: #keywords.join(", ")])
+      par(
+        text(size: 9pt)[
+          Additional Key Words and Phrases: #keywords.join(", ")],
+      )
       v(9.5pt)
     }
 
     // Display ACM reference format
-    par(text(size: 9pt, context [
-      #strong[ACM Reference Format:]\
-      #authors.map(author => author.name).join(", ", last: " and ").
-      #acmYear.
-      #title.
-      #emph(journal.nameShort)
-      #acmVolume,
-      #acmNumber,
-      Article #acmArticle (#displayMonth(acmMonth) #acmYear),
-      #counter(page).display((..nums) => [
-        #nums.pos().last() page#if(nums.pos().last() > 1) { [s] }.
-      ],both: true)
-      https:\/\/doi.org\/#acmDOI
-    ]))
+    par(
+      text(
+        size: 9pt,
+        context [
+          #strong[ACM Reference Format:]\
+          #authors.map(author => author.name).join(", ", last: " and ").
+          #acmYear.
+          #title.
+          #emph(journal.nameShort)
+          #acmVolume,
+          #acmNumber,
+          Article #acmArticle (#displayMonth(acmMonth) #acmYear),
+          #counter(page).display(
+            (..nums) => [
+              #nums.pos().last() page#if(nums.pos().last() > 1) { [s] }.
+            ],
+            both: true,
+          )
+          https:\/\/doi.org\/#acmDOI
+        ],
+      ),
+    )
     v(1pt)
 
     // place footer
@@ -244,7 +265,7 @@
       #line(length: 100%, stroke: 0.4pt + black)
       #v(.5em)
       #par[#if authors.len() == 1 [Author's] else [Authors' as]
-      Contact Information: #{
+        Contact Information: #{
         let displayAuthor(author) = [#author.name#{
           if author.at("email", default: none) != none [, #author.email]
         }]
@@ -283,7 +304,7 @@
       others than ACM must be honored. Abstracting with credit is
       permitted. To copy otherwise, or republish, to post on servers or to
       redistribute to lists, requires prior specific permission
-      and#h(.5pt)/or  a fee. Request permissions from
+      and#h(.5pt)/or a fee. Request permissions from
       permissions\@acm.org.\
       #v(.75em)
       #sym.copyright #acmYear Copyright held by the owner/author(s). Publication rights licensed to ACM.\
@@ -292,7 +313,25 @@
     ]
   }
 
-  set heading(numbering: (..n) => [#n.pos().first()#h(7pt)])
+  show raw: it => {
+    set text(font: "Inconsolata", 10pt)
+    it
+  }
+  show raw.where(block: true): it => {
+    v(7pt)
+    it
+    v(7pt)
+  }
+
+  show list: it => {
+    v(6pt)
+    it
+    v(6pt)
+
+  }
+  set list(indent: 15pt, body-indent: 4.5pt, marker: ($bullet$, "?"))
+
+  set heading(numbering: (..n) => numbering("1.1", ..n) + h(7pt))
   show heading: it => {
     set text(font: sfFont, size: 10pt, weight: "bold")
     it
@@ -303,7 +342,8 @@
     justify: true,
     leading: 5.35pt,
     first-line-indent: 9.5pt,
-    spacing: 5.35pt)
+    spacing: 5.35pt,
+  )
   // show par: set block(below: 5.35pt)
 
   // set page(

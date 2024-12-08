@@ -25,7 +25,7 @@
               just
             ];
             FONTCONFIG_FILE = makeFontsConf {
-              fontDirectories = [libertine];
+              fontDirectories = [libertine inconsolata];
             };
           };
         }
