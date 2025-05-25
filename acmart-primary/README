@@ -12,6 +12,20 @@ The production version is the one on CTAN and ACM sites.
 
 Changes
 
+Version 2.12   Bug fixes
+	       Switched to unicode-math and libertinus for Unicode engines
+
+Version 2.11   Conference date is no longer printed in bibstrip.
+	       ISBN now uses 4-digit year
+	       DOI in bibliography is now output as doi:XX.XXXX/XXXXX.XXXX
+	       Changed URL in Creative Commons licenses (deleted
+	       trailing /legalcode)
+
+Version 2.10.  Bug fixes.  Documentation update.
+
+Version 2.09.  Experimental tagging code is now in the main branch.
+	       Creative Commons license is now allowed for all materials. 
+
 Version 2.08.  Section titles are in lowercase now.
 	       Documentation updates.
 

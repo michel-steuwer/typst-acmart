@@ -2,15 +2,19 @@
 default:
     just --list
 
-ours := "sample-typst-acmsmall"
+ours := "sample-typst-descend-pldi"
 
 # watch typst file
 typst:
-    typst watch {{ ours }}.typ
+    typst watch {{ ours }}.typ --font-path=./fonts
+
+# watch latex file
+latex:
+    (cd sample-descend-pldi-paper; latexmk -pdf -pvc -view=none -shell-escape main.tex)
 
 # diff the pdfs
 diff:
-    watchexec --watch {{ ours }}.pdf "diff-pdf --output-diff=diff.pdf sample-acmsmall.pdf {{ ours }}.pdf || true"
+    watchexec --watch {{ ours }}.pdf "diff-pdf --output-diff=diff.pdf sample-descend-pldi-paper/main.pdf {{ ours }}.pdf || true"
 
 # run `typst` and `watch` recipes in parallel
 watch:

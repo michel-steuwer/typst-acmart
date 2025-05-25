@@ -1,5 +1,7 @@
 #import "template.typ": *
 
+#import "@preview/swank-tex:0.1.0": *
+
 #show: acmart.with(
   format: "acmsmall",
   title: "The Name of the Title is Hope",

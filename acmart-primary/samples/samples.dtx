@@ -14,7 +14,19 @@
 %TC:envir comment 0 0
 %TCMACROS
 %% 
-%% 
+%</all>
+%<*tagged>
+%% The tagged file should start with the metadata commands.
+%% We also need currently use lualatex-dev for compilation!
+\ifx\HCode\Undef
+\DocumentMetadata{
+ pdfversion=2.0,pdfstandard=ua-2,
+ testphase={phase-III,firstaid,math,title}}
+\else
+\DocumentMetadata{}
+\fi
+%</tagged>
+%<*all>
 %% The first command in your LaTeX source must be the \documentclass
 %% command.
 %%
@@ -27,7 +39,8 @@
 %%
 %%
 %<manuscript>\documentclass[manuscript,screen,review]{acmart}
-%<acmsmall|acmsmall-conf>\documentclass[acmsmall]{acmart}
+%<acmsmall&!tagged>\documentclass[acmsmall]{acmart}
+%<acmsmall-conf>\documentclass[acmsmall]{acmart}
 %<acmsmall-biblatex>\documentclass[acmsmall,natbib=false]{acmart}
 %<acmsmall-submission>\documentclass[acmsmall,screen,review]{acmart}
 %<acmlarge>\documentclass[acmlarge]{acmart}
@@ -41,7 +54,7 @@
 %<sigconf-i13n>\documentclass[sigconf, language=french,
 %<sigconf-i13n>language=german, language=spanish, language=english]{acmart}
 %<acmcp>\documentclass[acmcp]{acmart}
-
+%<acmsmall&tagged>\documentclass[acmsmall]{acmart-tagged}
 %%
 %% \BibTeX command to typeset BibTeX logo in the docs
 \AtBeginDocument{%
@@ -58,12 +71,11 @@
 \copyrightyear{2018}
 \acmYear{2018}
 \acmDOI{XXXXXXX.XXXXXXX}
-
 %</all>
 %<*proceedings>
 %% These commands are for a PROCEEDINGS abstract or paper.
 \acmConference[Conference acronym 'XX]{Make sure to enter the correct
-  conference title from your rights confirmation emai}{June 03--05,
+  conference title from your rights confirmation email}{June 03--05,
   2018}{Woodstock, NY}
 %%
 %%  Uncomment \acmBooktitle if the title of the proceedings is different
@@ -71,7 +83,7 @@
 %%
 %%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
 %%  June 03--05, 2018, Woodstock, NY} 
-\acmISBN{978-1-4503-XXXX-X/18/06}
+\acmISBN{978-1-4503-XXXX-X/2018/06}
 %</proceedings>
 
 %<*journal>
@@ -452,7 +464,7 @@ Frequently-used parameters, or combinations of parameters, include:
 \begin{itemize}
 \item {\texttt{anonymous,review}}: Suitable for a ``double-anonymous''
   conference submission. Anonymizes the work and includes line
-  numbers. Use with the \texttt{\acmSubmissionID} command to print the
+  numbers. Use with the \texttt{\string\acmSubmissionID} command to print the
   submission's unique ID on each page of the work.
 \item{\texttt{authorversion}}: Produces a version of the work suitable
   for posting by the author.
@@ -598,12 +610,33 @@ two-page articles (or abstracts).
 \section{Sectioning Commands}
 
 Your work should use standard \LaTeX\ sectioning commands:
-\verb|section|, \verb|subsection|, \verb|subsubsection|, and
-\verb|paragraph|. They should be numbered; do not remove the numbering
+\verb|\section|, \verb|\subsection|, \verb|\subsubsection|,
+\verb|\paragraph|, and \verb|\subparagraph|. The sectioning levels up to
+\verb|\subsusection| should be numbered; do not remove the numbering
 from the commands.
 
 Simulating a sectioning command by setting the first word or words of
 a paragraph in boldface or italicized text is {\bfseries not allowed.}
+
+Below are examples of sectioning commands.
+
+\subsection{Subsection}
+\label{sec:subsection}
+
+This is a subsection.
+
+\subsubsection{Subsubsection}
+\label{sec:subsubsection}
+
+This is a subsubsection.
+
+\paragraph{Paragraph}
+
+This is a paragraph.
+
+\subparagraph{Subparagraph}
+
+This is a subparagraph.
 
 \section{Tables}
 
