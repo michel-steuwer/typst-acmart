@@ -1,8 +1,13 @@
 #import "template.typ": *
 
-#let Descend = text(style: "italic")[Descend]
+#let Descend = text(style: "italic")[Descend#sym.space.thin]
 
-#let code(
+#let code(content) = {
+  show raw: set text(font: mathTtFont, size: 9pt, weight: "regular")
+  content
+}
+
+#let codeListing(
   line-spacing: 6pt,
   line-offset: 5pt,
   numbering: true,
@@ -56,7 +61,7 @@
     let maximum-number-length = measure(number-style(lines.at(1))).width
 
     stack(dir: ttb,
-      v(6pt),  
+      v(3pt),  
       block(
         inset: (left: 2pt),
         width: width,
@@ -111,10 +116,10 @@
   raw(block: true, lang: source.lang, source.text)
 }
 
-#let cudaCode(numbering: true, source) = code(numbering: numbering, lang: text(font: ttFont, fill: rgb(208, 140, 0), size: 7pt, "CUDA"),
+#let cudaCode(numbering: true, source) = codeListing(numbering: numbering, lang: text(font: ttFont, fill: rgb(208, 140, 0), size: 7pt, "CUDA"),
   source)
 
-#let descendCode(source, numbering: true, text-style: (font: ttFont, size: 8pt, spacing: 100%)) = code(numbering: numbering, text-style: text-style, lang: text(font: ttFont, fill: rgb(10, 84, 175), size: 7pt, "Descend"),
+#let descendCode(source, numbering: true, text-style: (font: ttFont, size: 8pt, spacing: 100%)) = codeListing(numbering: numbering, text-style: text-style, lang: text(font: ttFont, fill: rgb(10, 84, 175), size: 7pt, "Descend"),
   source)
 
 #show: acmart.with(
@@ -155,7 +160,7 @@ In contrast to prior safe high-level GPU programming approaches, #Descend is an 
 #Descend introduces a new _holistic GPU programming_ model where computations are hierarchically scheduled over the GPU's _execution resources_: grid, blocks, warps, and threads.
 #Descend's extended _Borrow_ checking ensures that execution resources safely access memory regions without data races.
 For this, we introduced _views_ describing safe parallel access patterns of memory regions, as well as _atomic_ variables.
-For memory accesses that can't be checked by our type system, users can annotate limited code sections as `unsafe`.
+For memory accesses that can't be checked by our type system, users can annotate limited code sections as #code[`unsafe`].
 
 We discuss the memory safety guarantees offered by #Descend and evaluate our implementation using multiple benchmarks, demonstrating that #Descend is capable of expressing real-world GPU programs showing competitive performance compared to manually written CUDA programs lacking #Descend's safety guarantees.
   ],
@@ -210,14 +215,14 @@ __global__ void transpose(const double *input, double *output) {
 In lines 4--5, each thread copies four matrix elements into a buffer and then---after a synchronization---copies the transposed elements to the output.
 The correctness of this function depends on correct indexing which is notoriously tricky.
 In fact, @lst:cuda-transpose-example contains a subtle bug:
-In line 4, `threadIdx.y+j` should be enclosed by parenthesis, so that both terms are multiplied by 32.
+In line 4, #code[`threadIdx.y+j`] should be enclosed by parenthesis, so that both terms are multiplied by 32.
 As a result, a data race occurs as multiple threads will write uncoordinated into the same memory location.
 
 Rust has demonstrated that a systems programming language can be designed in a memory safe way without losing low-level control.
 It prevents data races, by forbidding the concurrent access of threads to a memory resource if at least one thread is allowed to mutate it #cite(label("DBLP:journals/cacm/JungJKD21")).
 Rust enforces this with its type system, specifically with _borrow_ checking, that interacts with the concepts of _ownership_ and _lifetimes_ which primarily ensure safe memory management.
 Could Rust have prevented the bug in @lst:cuda-transpose-example?
-Clearly, `tmp` is shared among the parallel executing threads and, clearly, we mutate its content in line 5.
+Clearly, #code[`tmp`] is shared among the parallel executing threads and, clearly, we mutate its content in line 5.
 Therefore, Rust would reject this kernel, without even attempting to investigate if the indexing is safe, as Rust's type system has no capabilities of reasoning about safely accessing an array in parallel by multiple threads.
 
 In this paper, we introduce #Descend, a safe GPU programming language adapting and extending the ideas of Rust towards GPU systems.
@@ -226,8 +231,8 @@ In contrast to prior safe GPU programming approaches, such as Futhark #cite(labe
 @lst:descend-transpose-example shows the matrix transposition function in #Descend.
 In contrast to CUDA, this function is not implicitly executed by thousands of GPU threads, instead this function is executed by the (_one_) GPU grid.
 Programmers describe the hierarchical scheduling of the computation over the _grid_, first by describing the scheduling of _blocks_ (line~4) and then the nested _threads_ (line~5).
-Each `block` has access to its own shared memory that is passed into the function in line~2.
-Each `thread` performs the same copies as in CUDA, first from the input into the temporary buffer, and then---after a synchronization--- back into the output.
+Each #code[`block`] has access to its own shared memory that is passed into the function in line~2.
+Each #code[`thread`] performs the same copies as in CUDA, first from the input into the temporary buffer, and then---after a synchronization--- back into the output.
 Instead of raw indexing, in #Descend programmers use memory _views_ to describe parallel accesses into memory.
 #Descend statically ensures that accesses into views are safe, and treats them specially in the type system.
 This restricts memory accesses to safe parallel access patterns.
@@ -261,7 +266,7 @@ With #Descend, we explore one new point in the design space of GPU programming l
 As we will see in this paper, #Descend empowers programmers to safely control low-level details including memory layout and which thread accesses which memory location when.
 This allows expressing GPU algorithms safely, that cannot be described natively by the user and are built-in in existing safe GPU approaches.
 
-#v(6pt)
+#smallskip
 
 #set list(indent: 24pt, body-indent: 0pt, marker: place(top+left, dx: -9pt, text(16pt, [•], baseline: -3pt)))
 #show list : it => {
@@ -317,27 +322,31 @@ how to avoid _data races_ and how to correctly _synchronize_ the threads of a bl
 #paragraph[Data Races]
 Data races occur when multiple threads simultaneously access the same memory location and at least one performs a write.
 It is easy to create a data race in CUDA:
+
+#v(2pt)
 #cudaCode(```cpp
 __global__ void rev_per_block(double *array) {
   double *block_part = &array[blockIdx.x * blockDim.x];
   block_part[threadIdx.x] = block_part[blockDim.x-1 - threadIdx.x]; }
 ```)
 
-#parIndent In this example, that is inspired by a bug in a real-world kernel described by #cite(label("DBLP:conf/icse/WuOZZ0Z20")), the input `array` is split into independent parts for each block.
+#parIndent In this example, that is inspired by a bug in a real-world kernel described by #cite(label("DBLP:conf/icse/WuOZZ0Z20")), the input #code[`array`] is split into independent parts for each block.
 Then the threads in each block access a single element in the reverse order of their thread index and write the value back into the array at their thread index.
 This creates a data race:
 a thread may still be reading a value from an index that another thread is already writing to.
 In #Descend, the compiler recognizes the possibility of a data race and would reject the program with an error message:
+
+#v(1em + 2pt)
 #descendCode(```rust
 error: conflicting memory access
   | arr[[thread]] = arr.rev[[thread]];
   |                 ^^^^^^^^^^^^^^^^^-------------------
   | ^^^^^^^^^^^^^ cannot select memory because of a conflicting prior selection here
 ```)
-#v(1em)
+#v(1em + 1pt)
 
 #parIndent We will explain in @sec:descend, that for this check #Descend performs an extended _borrow (or access) checking_ similar to Rust, tracing which memory location (formalized as _place expressions_) is accessed by which thread (formalized as _execution resources_).
-To make this check feasible, in #Descend parallel memory accesses are performed via _views_, which are safe parallel access patterns, such as `rev` for reverse in this example.
+To make this check feasible, in #Descend parallel memory accesses are performed via _views_, which are safe parallel access patterns, such as #code[`rev`] for reverse in this example.
 Views can be composed to enable complex parallel access patterns that are still known to be safe.
 
 #paragraph[Synchronization]
@@ -348,14 +357,18 @@ More recent versions of CUDA have added support for grid-wide and partial barrie
 the underlying GPU supports even more sophisticated barriers, such as named and producer-consumer barriers #cite(label("DBLP:conf/ppopp/BauerTA14")).
 To avoid undefined behavior, when using a barrier, each participating thread must reach that barrier.
 Unfortunately, it is easy to violate this requirement, such as for this block-wide barrier:
+
+#v(1em + 2pt)
 #cudaCode(numbering: false, ```cpp
 __global__ kernel(...) { if (threadIdx.x < 32) { __syncthreads() } }
 ```)
-#v(1em)
+#v(1em + 1pt)
 
-#parIndent In this CUDA kernel, the `__syncthreads` barrier is executed only by threads that have an index smaller than $32$ within each block.
+#parIndent In this CUDA kernel, the #code[`__syncthreads`] barrier is executed only by threads that have an index smaller than $32$ within each block.
 When launched with more than $32$ threads per block, the behavior of the program is undefined.
 In #Descend, a program such as this would not compile, if there are more than $32$ threads per block, failing with an error message:
+
+#v(1em + 2pt)
 #descendCode(```rust
 error: barrier not allowed here
   | first_32_threads => { sync }
@@ -363,10 +376,10 @@ error: barrier not allowed here
   |    split(X) block at 32 {
   |    ^^^^^^^^^^^^^^^^^^^^ `block` is split here
 ```)
-#v(1em)
+#v(1em + 1pt)
 
 #parIndent We will discuss in @sec:descend, how the compiler checks that synchronizations are performed correctly.
-In #Descend, either all threads in a block perform the same instructions (when using the `sched` syntax seen before), or the threads in a block must be split using the syntax shown in the error message above.
+In #Descend, either all threads in a block perform the same instructions (when using the #code[`sched`] syntax seen before), or the threads in a block must be split using the syntax shown in the error message above.
 A synchronization performed on a split block or a conditional is forbidden.
 #Descend also ensures that synchronizations are not forgotten.
 A synchronizations releases borrows of the synchronized memories which, if forgotten, are flagged by the borrow checker as seen above.
@@ -390,37 +403,42 @@ When transferring data between the CPU and GPU explicitly, a _host_ thread that 
 The host program only accesses CPU memory, while a GPU program only accesses its various GPU memories.
 Programmers are responsible for keeping track of which pointers point into the CPU or GPU memory.
 This makes it easy for programmers to make mistakes that are not caught by the compiler, such as misusing the provided API for copying data to the GPU:
+#v(4pt)
 #cudaCode(numbering: false, ```cpp
 cudaMemcpy(d_vec, h_vec, size, cudaMemcpyDeviceToHost);
 ```)
-#v(1em)
+#v(.9em)
 
-#parIndent Function `cudaMemcpy` copies `size` many bytes to the destination in the first argument from the source in the second argument.
+#parIndent Function #code[`cudaMemcpy`] copies #code[`size`] many bytes to the destination in the first argument from the source in the second argument.
 The last argument specifies whether the destination and source are on the device or host.
 In the above call, destination and source pointers are swapped, which leads to the address in the host pointer being used to access memory on the device, with undefined behavior.
 In #Descend, reference types carry additional information and correct usage is strictly enforced.
 Making the same mistake as above, leads to a compile-time error message:
+#v(5pt)
 #descendCode(```rust
 error: mismatched types
   | copy_mem_to_host(d_vec, h_vec);
   |                  ^^^^^ expected reference to `gpu.global`, found reference to `cpu.mem`
 ```)
-#v(1em)
+#v(.9em)
 
 #parIndent In CUDA, without using Unified Memory, special allocation APIs, or a CUDA-aware allocator in the operating system, it is possible to allocate memory in CPU memory and pass the CPU pointer to the GPU.
 The GPU kernel may then accidentally attempt to access CPU memory directly, as in the following code:
+
+#v(5pt)
 #cudaCode(```cpp
 void host_fun() { double *vec = malloc(sizeof(double) * N * N);  init_kernel<<<N, N>>>(vec); }
 __global__ void init_kernel(double *vec) { vec[globalIdx.x] = 1.0; }
 ```)
-#v(1em)
+#v(.9em)
 
 #parIndent In this example, the host allocates space for an array in the CPU main memory and passes the resulting pointer to the GPU.
 The GPU program then attempts to initialize the memory, but it has no access to the separated main memory, leading to undefined behavior.
 With full support of CUDA Unified Memory, this program is well-defined, as the GPU would directly access the CPU main memory, resulting in an implicit memory transfer.
-%
 In the initial version of #Descend, a program such as this would be rejected by the compiler because it recognizes that we are attempting to access CPU memory on the GPU.
 The equivalent Descend program fails like this:
+
+#v(6pt)
 #descendCode(```rust
 error: cannot dereference `*vec` pointing to `cpu.mem`
   |  (*vec)[[thread]] = 1.0
@@ -428,7 +446,7 @@ error: cannot dereference `*vec` pointing to `cpu.mem`
   |    sched(X) thread in grid.to_threads {
   |             ^^^^^^ executed by `gpu.Thread`
 ```)
-#v(1em)
+#v(.9em)
 
 #parIndent In @sec:descend, we introduce _execution resources_ that identify _who_ executes a piece of code with a focus on the GPU.
 However, these also extend to CPU threads.
@@ -438,30 +456,36 @@ The formal type system, introduced in @sec:descend-types, extends references wit
 In CUDA---and #{Descend}---when launching a function on the GPU, the host thread specifies the launch configuration, i.e., the number of threads executing the kernel and their grouping into blocks.
 For GPU functions, there are often implicit assumptions about the number of threads that are going to execute the function as well as the amount of memory that is allocated via the host's memory API.
 But these assumptions are easily violated on either the CPU or GPU side, such as for this GPU function scaling a vector:
+
+#v(5pt)
 #cudaCode(numbering: false, ```cpp
 __global__ scale_vec_kernel(double *vec) { vec[globalIdx.x] = vec[globalIdx.x] * 3.0; }
 ```)
-#v(1em)
+#v(.9em)
 
 #parIndent Each GPU thread accesses a single element of the vector at its index within the entire grid.
 The assumption made here, is that the grid contains as many threads as there are elements in the vector.
 For example, the following launch of the GPU function from the CPU is erroneous:
+
+#v(6pt)
 #cudaCode(```cpp
 cudaMalloc(&d_ptr, SIZE);
 ...
 scale_vec_kernel<<<1, SIZE>>>(d_ptr);
 ```)
-#v(1em)
+#v(.9em)
 
 #parIndent Instead of starting as many threads as there are vector elements, the function is executed by as many threads as there are _bytes_ in the vector.
 By launching the GPU function with more threads than vector elements, out-of-bounds memory accesses are triggered.
 In #Descend, calling a GPU program with the wrong number of threads leads to an error message at compile time:
+
+#v(6pt)
 #descendCode(```rust
 error: mismatched types
   |  scale_vec<<<X<1>, X<SIZE>>>>(d_vec);
   |                               ^^^^^ expected `[f64; SIZE]`, found `[f64; ELEMS]`
 ```)
-#v(1em)
+#v(.5em)
 
 #parIndent We will see in @sec:descend, that all functions are annotated with an execution resource describing how the function expects to be executed.
 This makes assumptions explicit.
@@ -476,7 +500,7 @@ We start by introducing _execution resources_, _place expressions_, and _views_ 
 As shown in the previous section, the correctness of a GPU program often depends on the specific grid of blocks and threads that executes it.
 Depending on the number of threads that the kernel is executed with, a memory location may or may not be accessed by multiple threads at the same time, memory accesses may go out-of-bounds or the kernel may simply not compute a complete result.
 Furthermore, some instructions are required to be executed by specific sets of threads.
-For example, the barrier `__syncthreads` must be executed by all threads within a block, and the warp-shuffle instruction `__shufl_sync` that moves values between threads without using slow global or shared memory, must be executed by a subset of threads within the same warp.
+For example, the barrier #code[`__syncthreads`] must be executed by all threads within a block, and the warp-shuffle instruction #code[`__shufl_sync`] that moves values between threads without using slow global or shared memory, must be executed by a subset of threads within the same warp.
 
 In traditional GPU languages, the grid is specified when the GPU kernel is executed.
 The kernel itself has no static knowledge about the grid and can only dynamically refer to its dimensions or blocks and threads.
@@ -486,17 +510,19 @@ To enable reasoning statically about the execution of GPU functions, #Descend in
 The type system uses execution resources to track whether values are owned or instructions are executed by the entire grid, specific blocks, warps or individual threads.
 For this, we need to be able to syntactically compare execution resources, which is the reason to define them with a formal syntax.
 
+#[
+#show figure: set place(clearance: 1em)
 #figure(placement: bottom,
 caption: [Grammar for Execution Resources and Dimensions],
   {
     set text(size: 9pt)
     block(width: 100%,
           stroke: black + 0.2mm,
-          inset: 6pt,
+          inset: 4pt,
       grid(
         columns: (1fr, 1fr),
         align: (top+left, top+right),
-        gutter: 6pt,
+        gutter: 4pt,
         {
           let di = math.cal[d]
           let eta = sym.eta
@@ -510,19 +536,19 @@ caption: [Grammar for Execution Resources and Dimensions],
           grid(
             columns: (10%, 10%, 30%, 45%),
             row-gutter: .5em,
-            [e], [::=], [],         [Execution Resources:],
-            [], [], [y],                      [identifier],
-            [], [], [`cpu.thread`],           [CPU Thread],
-            [], [], [`cpu.grid`#sym.angle.l#di, #di#sym.angle.r],
+            [$e$], [::=], [],         [Execution Resources:],
+            [], [], [$y$],                      [identifier],
+            [], [], code[`cpu.thread`],           [CPU Thread],
+            [], [], code[`gpu.grid`#sym.chevron.l#di, #di#sym.chevron.r],
                                               [GPU Grid],
-            [], [], [e .`blocks`#sym.angle.l c ; #math.overline[\[#eta..#eta\]#sub[d]] #sym.angle.r],
+            [], [], [$e$.#code[`blocks`]#sym.chevron.l c ; #math.overline[\[#eta..#eta\]#sub[d]] #sym.chevron.r],
                                               [blocks],
-            [], [], [e .`warps`#sym.angle.l c ; #math.overline[\[#eta..#eta\]] #sym.angle.r],
+            [], [], [$e$.#code[`warps`]#sym.chevron.l c ; #math.overline[\[#eta..#eta\]] #sym.chevron.r],
                                               [warps],
-            [], [], [e .`threads`#sym.angle.l c ; #math.overline[\[#eta..#eta\]#sub[d]] #sym.angle.r],
+            [], [], [$e$.#code[`threads`]#sym.chevron.l c ; #math.overline[\[#eta..#eta\]#sub[d]] #sym.chevron.r],
                                               [threads],
-            [], [], [e .`forall`(d)],         [forall],
-            [], [], [e\[#sym.eta..#sym.eta\]#sub[d]],
+            [], [], [$e$.#code[`forall`]\($d$)],         [forall],
+            [], [], [$e$\[#sym.eta..#sym.eta\]#sub[d]],
                                               [sub-selection],
             [d], [::=], [x | y | z],          [Dim-Selector],
           )
@@ -542,39 +568,44 @@ caption: [Grammar for Execution Resources and Dimensions],
             columns: (10%, 10%, 30%, 45%),
             row-gutter: .5em,
             [#di], [::=], [],                   [Dimensions:],
-            [], [], [`xyz`#sym.angle.l #eta, #eta, #eta #sym.angle.r], [3-dim],
-            [], [], [`xy`#sym.angle.l #eta, #eta #sym.angle.r |
-                     `xz`#sym.angle.l #eta, #eta #sym.angle.r |
-                     `yz`#sym.angle.l #eta, #eta #sym.angle.r], [2-dim],
-            [], [], [`x`#sym.angle.l #eta #sym.angle.r |
-                     `y`#sym.angle.l #eta #sym.angle.r |
-                     `z`#sym.angle.l #eta #sym.angle.r], [1-dim],
+            [], [], [#code[`xyz`]#sym.chevron.l #eta, #eta, #eta #sym.chevron.r], [3-dim],
+            [], [], [#code[`xy`]#sym.chevron.l #eta, #eta #sym.chevron.r |
+                     #code[`xz`]#sym.chevron.l #eta, #eta #sym.chevron.r |
+                     #code[`yz`]#sym.chevron.l #eta, #eta #sym.chevron.r], [2-dim],
+            [], [], [#code[`x`]#sym.chevron.l #eta #sym.chevron.r |
+                     #code[`y`]#sym.chevron.l #eta #sym.chevron.r |
+                     #code[`z`]#sym.chevron.l #eta #sym.chevron.r], [1-dim],
             [#eta], [::=], [],                    [Natrual Numbers:],
-            [], [], [n],                          [identifier],
+            [], [], [$n$],                          [identifier],
             [], [], [#math.underline(eta)],       [literal],
-            [], [], [#eta #math.plus.circle #eta],[binary operation],
-            [c], [::=], [`cond` | `all`],         [conditional select],
+            [], [], [#eta #math.plus.o #eta],[binary operation],
+            [$c$], [::=], [#code[`cond`] | #code[`all`]],         [conditional select],
           )
         }
       )
     )
   }
 ) <syn:execs>
+]
 
-#let xy(x, y) = $#`xy`#sym.angle.l#x, #y#sym.angle.r$
+#let xy(x, y) = $#code[`xy`]#sym.chevron.l#x, #y#sym.chevron.r$
 
+#v(-2pt)
 #paragraph[Formal Syntax of Execution Resources]
 @syn:execs shows the formal grammar of execution resources.
 Identifiers are abstract execution resources.
-The execution resource `cpu.thread` represents a single thread on the CPU.
-The `gpu.grid` stores two _dimensions_ $d$ that describe the up to three-dimensional shape of the blocks.
+The execution resource #code[`cpu.thread`] represents a single thread on the CPU.
+The #code[`gpu.grid`] stores two _dimensions_ $d$ that describe the up to three-dimensional shape of the blocks.
 The size of a dimension is represented as a natural number $eta$ that can either be a constant, a variable, or simple mathematical expressions over natural numbers.
-For example, a two-dimensional grid that consists of $2 times 2$ blocks, where each block consist of $4 times 4$ threads, is represented as: $#`gpu.grid`#sym.angle.l #xy(2, 2), #xy(4,4) #sym.angle.r$.
+For example, a two-dimensional grid that consists of $2 times 2$ blocks, where each block consist of $4 times 4$ threads, is represented as: $#code[`gpu.grid`]#sym.chevron.l #xy(2, 2), #xy(4,4) #sym.chevron.r$.
 To refer to all blocks of the grid we write:
+#v(.5em)
 $
-  #`gpu.grid`#sym.angle.l #xy(2,2), #xy(4, 4)#sym.angle.r#`.blocks`#sym.angle.l#`all;` #`xy`#sym.angle.l [0..2], [0..2] #sym.angle.r #sym.angle.r
+  #code[`gpu.grid`]#sym.chevron.l #xy(2,2), #xy(4, 4)#sym.chevron.r#code[`.blocks`]#sym.chevron.l#code[`all;`] #code[`xy`]#sym.chevron.l [0..2], [0..2] #sym.chevron.r #sym.chevron.r
 $
-In case we select everything, we use a simplified notation: $e.#`blocks` = e.#`blocks`#sym.angle.l#`all;` #`xy`#sym.angle.l [..][..] #sym.angle.r#sym.angle.r$.
+#v(.5em)
+
+In case we select everything, we use a simplified notation: $e.#`blocks` = e.#`blocks`#sym.chevron.l#`all;` #`xy`#sym.chevron.l [..][..] #sym.chevron.r#sym.chevron.r$.
 
 Analogously, we refer to collections of threads or a one-dimensional collection of warps (which in-turn consist of a one-dimensional collection of threads).
 Using the _conditional selection_, we represent when only a subset of threads (or blocks, or warps) has been selected based on a runtime condition.
@@ -583,16 +614,18 @@ This is important when detecting if a synchronization is safe or might lead to a
 Using _forall_, we quantify over a dimension, representing, e.g., a slice of blocks sharing the same index in one dimension.
 In a naive matrix-multiplication implementation, each row of blocks within the grid takes ownership over all the rows of the output matrix for which the block's threads compute a result.
 In order to express this, we need a way of referring to each row of blocks separately. 
-Each row of blocks is represented by quantifying over the `y`-dimension of blocks:
+Each row of blocks is represented by quantifying over the #code[`y`]-dimension of blocks:
+#v(.5em)
 $
-  #`gpu.grid`#sym.angle.l #xy(2,2), #xy(4,4)#sym.angle.r#`.blocks.forall(y)`
+  #code[`gpu.grid`]#sym.chevron.l #xy(2,2), #xy(4,4)#sym.chevron.r#`.blocks.forall(y)`
 $
+#v(.5em)
 
 Lastly, the _sub-selection_ operator changes the amount of selected sub-execution resources in a given dimension.
 This is useful in many scenarios.
 For example, to perform a reduction in a single block, some data is accumulated iteratively.
 With each iteration, the number of threads performing accumulations is halved.
-This means that only a subset of threads within the block is active, which we can represent as: $#`block` [0..(4\/2^i)]_#`x`$ where $i$ is the iteration index.
+This means that only a subset of threads within the block is active, which we can represent as: $#code[`block`] [0..(4\/2^i)]_#`x`$ where $i$ is the iteration index.
 
 With _execution resources_ we have a simple yet powerful formal way of referring to collections of blocks and threads within a multidimensional grid.
 Next, we have a look at how execution resources are managed in #Descend.
@@ -602,6 +635,7 @@ In #Descend execution resources are not specified freely anywhere in the program
 Instead, users schedule computations over every dimension of the highest level in the execution hierarchy.
 In the following example code, we execute a function with a two-dimensional GPU grid of $2 times 2$ blocks, each comprised of $4 times 4$ threads.
 
+#v(-2pt)
 #descendCode(```rust
 fn f(...) -[grid: gpu.Grid<XY<2,2>,XY<4,4>>]-> (){
   sched(Y) blockRow in grid.blocks {
@@ -610,27 +644,29 @@ fn f(...) -[grid: gpu.Grid<XY<2,2>,XY<4,4>>]-> (){
         fstThreadGroup => ... 
         sndThreadGroup => ... } } } }
 ```)
-#v(1em)
+#v(.9em)
 
-#parIndent Here, `grid` is the execution resource that executes function `f`.
+#parIndent Here, #code[`grid`] is the execution resource that executes function #code[`f`].
 The type annotation in line 1 specifies the shape of the grid.
 The body of the function is executed by the function's execution resource, so in this case, the entire grid.
-In line 2, we _schedule_ the nested computation over all groups of blocks in the grid with the same `y`-dimension (rows of blocks).
-For that we specify the execution resource to schedule over (`grid.blocks`) and provide an identifier (`blockRow`) to refer to the sub-execution resources.
+In line 2, we _schedule_ the nested computation over all groups of blocks in the grid with the same #code[`y`]-dimension (rows of blocks).
+For that we specify the execution resource to schedule over (#code[`grid.blocks`]) and provide an identifier (#code[`blockRow`]) to refer to the sub-execution resources.
 #Descend requires scheduling over the outer hierarchy levels completely before further scheduling computations within the inner levels.
 This means, that rows of blocks are not allowed to schedule computations over threads.
-Instead, a row of blocks must schedule the following computations over all blocks in the `x`-dimension.
-The scheduled identifier `block` is equivalent to execution resource $#`gpu.grid`#sym.angle.l#xy(2,2),#xy(4,4)#sym.angle.r#`.forall(y).forall(x)`$.
+Instead, a row of blocks must schedule the following computations over all blocks in the #code[`x`]-dimension.
+The scheduled identifier #code[`block`] is equivalent to execution resource $#code[`gpu.grid`]#sym.chevron.l#xy(2,2),#xy(4,4)#sym.chevron.r#code[`.forall(y).forall(x)`]$.
 Only when scheduling computations within a single block are we allowed to refer to the threads in the block.
-In line 4, each block splits the collection of its threads into two execution resources at index $1$ along the `y`-dimension.
-`fstThreadGroup` contains all threads with a thread index less than $1$ in `y`-dimension.
-`sndThreadGroup` contains the rest.
-The identifier `fstThreadGroup`, is equivalent to the following execution resource:
+In line 4, each block splits the collection of its threads into two execution resources at index $1$ along the #code[`y`]-dimension.
+#code[`fstThreadGroup`] contains all threads with a thread index less than $1$ in #code[`y`]-dimension.
+#code[`sndThreadGroup`] contains the rest.
+The identifier #code[`fstThreadGroup`], is equivalent to the following execution resource:
+#v(.5em)
 $
-  #`gpu.grid`#sym.angle.l#xy(2,2),#xy(4,4)#sym.angle.r#`.blocks.forall(y).forall(x).threads` [0..1]_#`y`
+  #`gpu.grid`#sym.chevron.l#xy(2,2),#xy(4,4)#sym.chevron.r#`.blocks.forall(y).forall(x).threads` [0..1]_#`y`
 $
+#v(.5em)
 
-The execution resources introduced here have three main purposes:
+#parIndent The execution resources introduced here have three main purposes:
 _1)_ they are used to checking what code is executed on the CPU and GPU;
 _2)_ they are used to checking which instructions are executed by which part of the GPU hierarchy, such as barrier synchronization must be executed inside a block;
 _3)_ they keep track of dimensions and sizes that are used in the code generation.
@@ -665,7 +701,7 @@ caption: [Grammar for Place Expressions],
             [], [], [p`.fst` | $p$.`snd`], [projections],
             [], [], [$ast.op$#h(-1pt)p], [dereference],
             [], [], [p[$eta$]], [index],
-            [], [], [p$bracket.l.double e bracket.r.double$], [select],
+            [], [], [p$bracket.l.stroked e bracket.r.stroked$], [select],
             [], [], [$p.v$], [view],
           )
         },
@@ -682,9 +718,9 @@ caption: [Grammar for Place Expressions],
             columns: (10%, 10%, 30%, 45%),
             row-gutter: .5em,
             [v], [::=], [], [Views],
-            [], [], [`group`::$#sym.angle.l eta #sym.angle.r$], [],
-            [], [], [`take_left`::$#sym.angle.l eta #sym.angle.r$], [],
-            [], [], [`take_right`::$#sym.angle.l eta #sym.angle.r$], [],
+            [], [], [`group`::$#sym.chevron.l eta #sym.chevron.r$], [],
+            [], [], [`take_left`::$#sym.chevron.l eta #sym.chevron.r$], [],
+            [], [], [`take_right`::$#sym.chevron.l eta #sym.chevron.r$], [],
             [], [], [`transpose`], [],
             [], [], [`reverse`], [],
             [], [], [`map`($v$)], [],
@@ -709,7 +745,7 @@ Single elements of an array are accessed by indexing.
 These place expressions exist in Rust as well.
 
 In #Descend, we introduce two additional place expressions: #emph[select]s and #emph[view]s.
-The select expression $p bracket.l.double e#`.forall`\(d) bracket.r.double$ distributes the ownership of elements within the array place expression $p$ over each sub-execution resource in dimension $d$.
+The select expression $p bracket.l.stroked e#`.forall`\(d) bracket.r.stroked$ distributes the ownership of elements within the array place expression $p$ over each sub-execution resource in dimension $d$.
 This requires the execution resource (e.g., block) to consists of as many sub-execution resources (e.g., threads) as there are elements in the array.
 Each sub-execution resource takes ownership over one element, ensuring a safe concurrent array access.
 
@@ -932,8 +968,8 @@ A technical report with the full type system of #Descend is available at https:/
 == Syntax of types
 
 #let Set(x) = ${space #x space}$
-#let unop(x) = $minus.circle #x$
-#let binop(x, y) = $#x plus.circle #y$
+#let unop(x) = $minus.o #x$
+#let binop(x, y) = $#x plus.o #y$
 #let refop(x, y, z) = $\& #x space #y space #z$
 #let idx(x, y) = $#x#`[`#y#`]`$
 #let seq(x, y) = $#x space ; space #y$
@@ -988,9 +1024,9 @@ caption: [Formal syntax of #Descend terms],
             columns: (10%, 10%, 30%, 45%),
             row-gutter: .5em,
             [v], [::=], [], [Views],
-            [], [], [`group`::$#sym.angle.l eta #sym.angle.r$], [],
-            [], [], [`take_left`::$#sym.angle.l eta #sym.angle.r$], [],
-            [], [], [`take_right`::$#sym.angle.l eta #sym.angle.r$], [],
+            [], [], [`group`::$#sym.chevron.l eta #sym.chevron.r$], [],
+            [], [], [`take_left`::$#sym.chevron.l eta #sym.chevron.r$], [],
+            [], [], [`take_right`::$#sym.chevron.l eta #sym.chevron.r$], [],
             [], [], [`transpose`], [],
             [], [], [`reverse`], [],
             [], [], [`map`($v$)], [],

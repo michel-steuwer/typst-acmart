@@ -2,6 +2,7 @@
 #let sfFont = "Linux Biolinum O"
 #let ttFont = "Inconsolatazi4"
 #let mathFont = "Libertinus Math"
+#let mathTtFont = "Latin Modern Mono"
 
 #let bigskipamount = 12pt
 #let medskipamount = bigskipamount / 2
@@ -14,12 +15,15 @@
 
 #let dbBlock(color, content) = block(fill: color, above: 0pt, below: 0pt, content)
 
+#let parIndentAmount = 9.5pt
+#let parIndent = h(parIndentAmount)
+
+#let smallskip = v(6pt)
+
 #let paragraph(title) = {
-  v(.5em)
+  v(0.8em)
   text(style: "italic", title + [.])
 }
-
-#let parIndent = h(9.5pt)
 
 #let acmart(
   // Currently supported formats are:
@@ -147,32 +151,36 @@
     width:  6.75in,
     height: 10in,
     margin: (
-      top:    58pt + 27pt,
-      bottom: 39pt + 24pt,
-      left:   46pt,
-      right:  46pt
-    ),
+        top:    58pt + 30pt,
+        bottom: 39pt + 24pt,
+        left:   46pt,
+        right:  46pt
+      ),
     header: context {
       set text(size: 8pt, font: sfFont)
       let (currentpage,) = counter(page).get()
       if currentpage != 1 {
         let acmArticlePage = [#acmArticle:#counter(page).display()]
         [
-          #block(
-            height: 10pt,
-            width: 100%, 
-            if calc.rem(currentpage, 2) == 0 [
-              #acmArticlePage
-              #h(1fr)
-              #shortauthors
-            ] else [
-              #shorttitle
-              #h(1fr)
-              #acmArticlePage
-            ]
+          #stack(
+            block(
+              height: 10pt,
+              width: 100%, 
+              if calc.rem(currentpage, 2) == 0 [
+                #acmArticlePage
+                #h(1fr)
+                #shortauthors
+              ] else [
+                #shorttitle
+                #h(1fr)
+                #acmArticlePage
+              ]
+            ),
+            block(height: 20pt, width: 100%)
           )
-          #v(17pt)
         ]
+      } else {
+        // block(height: 100%, width:100%, fill:blue)
       }
     },
     header-ascent: 0%,
@@ -206,9 +214,9 @@
     set par(justify: true, leading: 0.555555em, spacing: 0pt)
 
     // Display title
-    block(above: 0pt, below: 17pt, {
+    block(below: 17pt, {
       set text(font: sfFont, size: 14.4pt, weight: "bold")
-      par(title)
+      pad(top: -3pt, par(title))
     })
 
     // Display authors
@@ -297,7 +305,7 @@
         ],both: true)
         #link("https://doi.org/" + acmDOI)
       ])))
-
+    
     // place footer
     set text(size: 8pt)
     set par(leading: 0.6em)
@@ -365,35 +373,42 @@
   set heading(numbering: "1.1")
   show heading: it => {
     set text(font: sfFont, size: 10pt, weight: "bold")
-    if it.numbering == none { it } else {
-      block(inset: (top: 3pt), counter(heading).display(it.numbering) + h(10pt) + it.body)
+    if (it.level == 1) {
+      v(3pt)
+    } else if (it.level == 2) {
+      v(5pt)
     }
-    v(9pt - 0.555em)
+    if it.numbering == none { it } else {
+      block(counter(heading).display(it.numbering) + h(10pt) + it.body)
+    }
+    if (it.level == 1) {
+      v(9pt - 0.555em)
+    } else if (it.level == 2) {
+      v(2pt)
+    }
   }
-
   set par(
     justify: true,
     leading: 5.35pt,
-    first-line-indent: 9.5pt,
+    first-line-indent: parIndentAmount,
     spacing: 5.35pt)
 
   show figure.caption: it => {
     set text(size: 9pt, font: sfFont, spacing: 95%)
     align(center,
-      pad(bottom: 1.75em,
-        stack(dir: ltr,
-          [#it.supplement~#context it.counter.display(it.numbering).],
-          h(.5em),
-          it.body
-        )
+      stack(dir: ltr,
+        [#it.supplement~#context it.counter.display(it.numbering).],
+        h(.5em),
+        it.body
       )
     )
   }
+  show figure: set place(clearance: 3.1em)
 
   set figure(gap: 1.125em)
 
-  show raw: it => text(font: ttFont, it)
-  show raw.where(block: true): it => text(size: 8pt, it)
+  show raw: set text(font: ttFont)
+  show raw.where(block: true): set text(size: 8pt)
 
   set bibliography(style: "ACM-Reference-Format-author-year.csl")
 

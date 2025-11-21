@@ -10,7 +10,7 @@ typst:
 
 # watch latex file
 latex:
-    (cd sample-descend-pldi-paper; latexmk -pdf -pvc -view=none -shell-escape main.tex)
+    (cd sample-descend-pldi-paper; latexmk -lualatex -pvc main.tex)
 
 # diff the pdfs
 diff:
