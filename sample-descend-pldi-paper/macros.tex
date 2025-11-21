@@ -1,0 +1,319 @@
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+\newcommand{\ri}{\mathcal{r}}
+\newcommand{\di}{\mathcal{d}}
+
+%\newcommand{\code}[1]{\textcolor{gray}{\mathtt{#1}}}
+\newcommand{\code}[1]{\mathtt{#1}}
+% Set syntax
+\newcommand{\set}[1]{\{~#1~\}}
+\newcommand{\lowoverline}[1]{%
+  \overline{\smash{#1}\vphantom{\&}}\vphantom{#1}%
+}
+% Multiple loans syntax
+\newcommand{\loanseq}{\ell_1,\ldots,\ell_n}
+
+\newcommand{\outlrel}[2]{#1 :> #2}
+
+\newcommand{\subp}{\mathsf{subp}}
+
+% Macros for Mutability
+\newcommand{\Const}{\code{const}}
+\newcommand{\Mut}{\code{mut}}
+
+% Macros for Ownership
+\newcommand{\Shrd}{\code{shrd}}
+\newcommand{\Uniq}{\code{uniq}}
+
+% Macros for Kinds
+\newcommand{\Mem}{\code{mem}}
+\newcommand{\Own}{\code{own}}
+\newcommand{\Nat}{\code{nat}}
+\newcommand{\Exec}{\code{exec}}
+\newcommand{\Rgn}{\code{rgn}}
+\newcommand{\Dty}{\code{dty}}
+\newcommand{\Data}{\code{data}}
+
+% Macros for Memory Locations
+\newcommand{\CpuMem}{\code{cpu.mem}}
+\newcommand{\CpuHeap}{\code{cpu.heap}}
+\newcommand{\CpuStack}{\code{cpu.stack}}
+\newcommand{\GpuGlobal}{\code{gpu.global}}
+\newcommand{\GpuShared}{\code{gpu.shared}}
+\newcommand{\GpuLocal}{\code{gpu.local}}
+\newcommand{\NoMem}{\circ}
+
+% Macros for Expressions
+\newcommand{\unop}[1]{\oplus #1}
+\newcommand{\binop}[2]{#1 \oplus #2}
+\newcommand{\refop}[3]{\code{\&}#1~#2~#3}
+\newcommand{\splitop}[5]{\code{\&[}#1\code{]}~#2,#3~#4~#5}
+\newcommand{\idx}[2]{#1\code{[}#2\code{]}}
+\newcommand{\blockexpr}[2]{{}^{#1}\set{#2}}
+\newcommand{\letstmt}[3]{\code{let}~#1\code{:}#2 ~\code{=}~ #3}
+\newcommand{\letuninit}[2]{\code{let}~\Mut~#1\code{:}#2}
+\newcommand{\seq}[2]{#1\code{;}~ #2}
+\newcommand{\arr}[1]{\code{[}#1\code{]}}
+\newcommand{\tuple}[1]{\code{(}#1\code{)}}
+\newcommand{\assign}[2]{#1 \code{\coloneqq} #2}
+\newcommand{\idxassign}[3]{#1\code{[}#2\code{]} \code{\coloneqq} #3}
+\newcommand{\ifelsestmt}[3]{\code{if}~#1~\set{#2}~\code{else}~\set{#3}}
+\newcommand{\ifstmt}[2]{\code{if}~#1~\set{#2}}
+\newcommand{\whilestmt}[2]{\code{while}~#1~\set{#2}}
+\newcommand{\foreachloop}[3]{\code{for}~#1~\code{in}~#2~\set{#3}}
+\newcommand{\fornat}[3]{\code{for}~#1~\code{in}~#2 ~\set{#3}}
+\newcommand{\indep}[7]{\code{split}(#1)~#2~\code{at}~#3~\set{#4\Rightarrow#5\code{,}~#6\Rightarrow#7}}
+\newcommand{\sched}[4]{\code{sched(}#1\code{)}~#2~\code{in}~#3~\code{\{}~#4~\code{\}}}
+\newcommand{\while}[2]{\code{while}~#1~\set{#2}}
+\newcommand{\app}[4]{#1\code{::}\langle #2 \rangle\code{::}\langle #3 \rangle\code{(}#4\code{)}}
+\newcommand{\lambdafun}[4]{\code{|}#1\code{|} \code{\xrightarrow{\textcolor{black}{\mathnormal{#2}}}} #3~\set{#4}}
+\newcommand{\tupleview}[1]{\code{\textlangle}#1\code{\textrangle}}
+\newcommand{\letrgn}[2]{\code{\{}~#1~\code{\}}^{#2}}
+\newcommand{\borrow}[3]{\code{\&}#1~#2~#3}
+% #1: ownership qualifier, #2: place expression
+\newcommand{\loan}[2]{\prescript{#1}{}{#2}}
+\newcommand{\MaybeSplitPlExpr}{p^s}
+
+% Macros for Types
+\newcommand{\dead}[1]{{#1}^\dag}
+% Non-terminals
+\newcommand{\Type}{\tau}
+\newcommand{\DataTy}{\delta}
+\newcommand{\MaybeDeadDataTy}{\Type^{TX}}
+\newcommand{\MaybeDeadViewTy}{\Type^{VX}}
+\newcommand{\MaybeDeadTy}{\Type^{X}}
+\newcommand{\DeadDataTy}{\Type^{TD}}
+\newcommand{\DeadViewTy}{\Type^{VD}}
+\newcommand{\DeadTy}{\Type^{D}}
+\newcommand{\ThreadHierchyTy}{\DataTy^{H}} 
+% Type Constructors
+\newcommand{\arrty}[2]{\mathsf{[}#1\mathsf{;}~#2\mathsf{]}}
+\newcommand{\tuplety}[1]{\mathsf{(}#1\mathsf{)}}
+\newcommand{\atty}[2]{#1@#2}
+\newcommand{\arrviewty}[2]{\llbracket #1\code{;}~#2 \rrbracket}
+\newcommand{\bmarrayviewty}[2]{\bm{\code{[[}#1\code{;}~#2\code{]]}}}
+\newcommand{\refty}[4]{\code{\&}#1~#2~#3~#4}
+\newcommand{\funty}[4]{\forall\code{\langle}#1\code{\rangle}(#2) \xrightarrow{#3} #4}
+
+% Macros for Execution Resource Type
+\newcommand{\gridty}[2]{\code{gpu.Grid}~#1~#2}
+\newcommand{\blockty}[1]{\code{gpu.Block}~#1}
+\newcommand{\globalthreadsty}[2]{\code{gpu.GlobalThreads}~#1~#2}
+\newcommand{\blockgrpty}[2]{\code{gpu.BlockGrp}~#1~#2}
+%\newcommand{\bmblockgrpty}[1]{\bm{\code{BlockGrp\langle}#1\code{\rangle}}}
+\newcommand{\warpgrpty}[1]{\code{gpu.WarpGrp~#1}}
+%\newcommand{\bmwarpgrpty}[1]{\bm{\code{WarpGrp\langle}#1\code{\rangle}}}
+\newcommand{\threadgrpty}[1]{\code{gpu.ThreadGrp}~#1}
+\newcommand{\GpuThreadTy}{\code{gpu.Thread}}
+\newcommand{\CpuThreadTy}{\code{cpu.Thread}}
+\newcommand{\CpuThread}{\code{cpu.thread}}
+\newcommand{\ViewTy}{\code{View}}
+\newcommand{\View}{\code{view}}
+
+\newcommand{\splitthreadhierchyty}[3]{\code{Split\langle}#1, #2, #3\rangle}
+\newcommand{\bmsplitthreadhierchyty}[3]{\bm{\code{Split}\code{\langle}#1\code{,} #2\code{,} #3\code{\rangle}}}
+\newcommand{\dims}{\epsilon^{d}}
+\newcommand{\xyz}[3]{\code{xyz\langle}#1, #2, #3\code{\rangle}}
+\newcommand{\xy}[2]{\code{xy\langle}#1, #2\code{\rangle}}
+\newcommand{\xz}[2]{\code{xz\langle}#1, #2\code{\rangle}}
+\newcommand{\yz}[2]{\code{yz\langle}#1, #2\code{\rangle}}
+\newcommand{\x}[1]{\code{x\langle}#1\code{\rangle}}
+\newcommand{\y}[1]{\code{y\langle}#1\code{\rangle}}
+\newcommand{\z}[1]{\code{z\langle}#1\code{\rangle}}
+
+% Constant Types
+\newcommand{\Float}{\code{f32}}
+\newcommand{\Int}{\code{i32}}
+\newcommand{\Bool}{\code{bool}}
+\newcommand{\UnitTy}{\code{unit}}
+\newcommand{\GpuTy}{\code{GPU}}
+\newcommand{\ThreadTy}{\code{Thread}}
+\newcommand{\BmThreadTy}{\bm{\code{Thread}}}
+\newcommand{\TupleTy}{{(\DataTy_1, \ldots, \DataTy_n)}}
+\newcommand{\ArrayTy}{\arrty{\DataTy}{\eta}}
+\newcommand{\ArrayViewTy}{\arrviewty{\tau}{\eta}}
+\newcommand{\TupleViewTy}{\tupleviewty{\tau_1,\ldots,\tau_n}}
+\newcommand{\AtTy}{\atty{\DataTy}{\mu}}
+\newcommand{\RefTy}{\refty \rho \omega \mu \DataTy}
+\newcommand{\ThreadGrpTy}{\threadgrpty{\eta_1, \eta_2, \eta_3}}
+\newcommand{\BmThreadGrpTy}{\bmthreadgrpty{\dims}}
+\newcommand{\BlockGrpTy}{\blockgrpty{\dims, \ThreadGrpTy}}
+\newcommand{\BmBlockGrpTy}{\bmblockgrpty{\dims, \BmThreadGrpTy}}
+\newcommand{\BmSplitThreadHierchyTy}{\bmsplitthreadhierchyty{X}{\ThreadHierchyTy}{\eta}}
+\newcommand{\WarpGrpTy}{\warpgrpty{\eta}}
+\newcommand{\BmWarpGrpTy}{\bmwarpgrpty{\eta}}
+\newcommand{\WarpTy}{\code{Warp}}
+\newcommand{\BmWarpTy}{\textbf{\code{Warp}}}
+\newcommand{\FunTy}{\funty{x_1: \kappa_1,~\ldots, x_n: \kappa_n}{\Type_1,~\ldots,\Type_m}{\varepsilon}{\Type}}
+\newcommand{\Sched}{\sched{\optional{X \opt Y \opt Z}}{x}{e}{t}}
+\newcommand{\BmParFor}{\bmparfor{d}{x}{e_p}{e}}
+
+% Nat Expressions
+\newcommand{\Natlit}{\underline{\eta}}
+\newcommand{\natapp}[2]{#1\code{(}#2\code{)}}
+%%%%%%%
+% Meta
+%%%%%%%
+% Well-formedness judgements
+\newcommand{\wftyctx}[4]{#1;~ #2;~#3 \vdash #4}
+\newcommand{\wfty}[3]{#1;~ #2 \vdash #3 : \Dty}
+\newcommand{\wfexecty}[2]{#1 \vdash #2}
+\newcommand{\wfdim}[2]{#1 \vdash #2}
+\newcommand{\wftyj}[1]{\wfty{\Delta}{\Gamma}{#1}}
+\newcommand{\wfrgn}[3]{#1;~ #2 \vdash #3: \Rgn}
+\newcommand{\wfrgnj}[1]{\wfrgn{\Delta}{\Gamma}{#1}}
+\newcommand{\wk}[3]{#1 \vdash #2 : #3}
+\newcommand{\wfnat}[2]{#1 \vdash #2 : \Nat}
+\newcommand{\wfnatj}[1]{\wfnat{\Delta}{#1}}
+\newcommand{\wfmem}[2]{#1 \vdash #2 : \Mem}
+\newcommand{\wfmemj}[1]{\wfmem{\Delta}{#1}}
+\newcommand{\wfaccessctx}[6]{#1;~#2;~#3~|~#4~;#5 \vdash #6}
+
+% Contexts
+\newcommand{\stackfrm}[1]{~\natural~#1}
+\newcommand{\FrameTyping}{\mathpzc{F}}
+\newcommand{\ContFrameTyping}{\mathpzc{C}}
+
+% Type judgement
+\newcommand{\typejudge}[9]{%
+  \def\tempa{#1}%
+  \def\tempb{#2}%
+  \def\tempc{#3}%
+  \def\tempd{#4}%
+  \def\tempe{#5}%
+  \def\tempf{#6}%
+  \def\tempg{#7}%
+  \def\temph{#8}%
+  \def\tempi{#9}%
+  \typejudgecontinued
+}
+\newcommand{\typejudgecontinued}[2]{%
+  \tempa\,;\,\tempc~~|~~\tempe\,;\,\tempf~~|~~\tempg~\vdash \boxed{\temph ~: \tempi}~\dashv~#1~~|~~#2
+}
+% make into typejudge with omega? indexing requires a propper type judge and possibly memory accesses
+\newcommand{\pljudge}[8]{%
+  #1\,;\,#3~~|~~#4\,;\,#5~\vdash^{#6}_{\code{pl}} #7 ~: #8
+} 
+\newcommand{\accjudge}[9]{%
+  #1\,;\,#2~~|~~#4\,;\,#5~~|~~#6~~ \vdash^{#7}  ~\textbf{borrow$^{+}$}~#8 \Rightarrow \set{#9}
+}
+\newcommand{\narrowjudge}[3]{%
+  \text{narrowing\_check}(#3,~~#1\,;#2)
+}
+
+\newcommand{\conflictjudge}[4]{%
+  \text{access\_conflict\_check}(#4,#3~~#1\,;#2)
+}
+
+\newcommand{\borrowjudge}[4]{%
+  #1~\vdash^#2~\textbf{borrow}~#3 \Rightarrow \set{#4}
+}
+
+\newcommand{\rrjudge}[6]{%
+  #1\,;\,#2~\vdash^{#3}~#4 \leadsto #5 \dashv #6
+}
+\newcommand{\rrmode}{\nu}
+\newcommand{\oljudge}[7]{%
+  #1\,;\,#2\,;\,#3~~|~~#4~\vdash~#5 :> #6 \dashv #7
+}
+
+\newcommand{\execjudge}[4]{#1;~#2 \vdash #3: #4} 
+\newcommand{\morespecexec}[4]{#1;~#2 \vdash #3 \sqsubseteq #4}
+
+\newcommand{\typ}[9]{#1;~ #2;~ #3;~ #4 \vdash_{#5} #6 ~: #7 \dashv #8;~#9}
+\newcommand{\typj}[4]{\typ{\Sigma}{\Delta}{\Gamma}{\Theta}{\varepsilon}{#1}{#2}{#3}{#4}}
+% Ownership judgement
+\newcommand{\own}[6]{#1; #2 \vdash^{#3}_{#4} #5 \Rightarrow \set{#6}}
+\newcommand{\ownj}[2]{\own{\Delta}{\Gamma}{\overline{\pi_e}}{\omega}{#1}{#2}}
+% Subtyping judgement
+\newcommand{\sub}[5]{#1;~ #2 \vdash #3 \lesssim #4 \Rightarrow #5}
+\newcommand{\subj}[3]{\sub{\Delta}{\Gamma}{#1}{#2}{#3}}
+% Outlives judgement
+\newcommand{\outl}[5]{#1;~ #2 \vdash #3 :> #4 \Rightarrow #5}
+\newcommand{\outlj}[3]{\outl{\Delta}{\Gamma}{#1}{#2}{#3}}
+\newcommand{\outlseq}[5]{#1;~ #2 \vdash \overline{#3 :> #4} \Rightarrow #5}
+% Place typing judgement
+\newcommand{\pltyrgn}[9]{#1;~ #2;~ #3 \vdash^{#4}_{#5} #6 : #7, #8, #9}
+\newcommand{\plty}[8]{#1;~ #2;~ #3 \vdash^{#4}_{#5} #6 : #7, #8}
+\newcommand{\pltyj}[3]{\Sigma;~ \Delta;~ \Gamma \vdash^{\varepsilon}_{#1} #2 : #3}
+% Type equality
+\newcommand{\tyeq}[3]{#1 \vdash #2 \simeq #3}
+% Remap place types
+\newcommand{\remap}[3]{#1[#2 \mapsto #3]}
+% Remove loans that dereference the place
+% #1 context, #2 place, #3 context without dereferenced place
+\newcommand{\remderefloan}[2]{#1 \vartriangleright #2}
+% Macros for the Syntax Table
+\newcommand{\opt}{~\textcolor{gray}{|}~}
+\newcommand{\optional}[1]{\textcolor{gray}{[}#1\textcolor{gray}{]}}
+% #1: comma separated list of options
+\newcommand{\opts}[1]{\StrSubstitute{#1}{,}{\opt}}
+\newcommand{\sdef}{\textcolor{gray}{\Coloneqq}}
+
+% Meta functions
+\newcommand{\metafn}[2]{\texttt{#1}(#2)}
+\newcommand{\speq}{\quad{=}\quad}
+\newcommand{\subst}[2]{[#1 := #2]}
+
+% Table helpers
+% an entry in the syntax table
+\newcommand{\tentry}[4]{$ #1 $ & $ #2 $ & $ #3 $ & \color{gray}#4\\}
+\newcommand{\temptyl}{\tentry{}{}{}{}{}}
+\newcommand{\spcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% special cell math mode
+\newcommand{\spmcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}$#2$\end{tabular}}
+
+
+\newcommand{\ViewTyCtx}{{\ViewTy}^\square}
+\newcommand{\ArrViewTyCtx}{\arrviewty{\ViewTyCtx}{n}}
+
+\newcommand{\PlExprCtx}{p^\square}
+\newcommand{\PlDerefCtx}{*\PlExprCtx}
+\newcommand{\PlProjCtx}{\PlExprCtx.\Natlit}
+\newcommand{\MbSplitPlExprCtx}{{\MaybeSplitPlExpr}^\square}
+\newcommand{\MbSplitDerefCtx}{*\MbSplitPlExprCtx}
+\newcommand{\MbSplitProjCtx}{\MbSplitPlExprCtx.\Natlit}
+\newcommand{\plexprctxapp}[2]{#1^\square[#2]}
+\newcommand{\rgnmap}[2]{#1 \mapsto \set{#2}}
+
+% Meta functions
+\newcommand{\cpy}[2]{\operatorname{copyable}_{#1} #2}
+\newcommand{\noncpy}[2]{\operatorname{noncopyable}_{#1} #2}
+\newcommand{\gcloans}[1]{\operatorname{gc-loans}(#1)}
+\newcommand{\accessible}[2]{\operatorname{accessible}_{#1} #2}
+\newcommand{\occursin}[1]{\operatorname{occurs~in} #1}
+\newcommand{\overlap}[2]{#1~\#~#2}
+\newcommand{\viewtyctxapp}[1]{\ViewTyCtx[#1]}
+\newcommand{\metaforall}[2]{\text{forall}~#1~#2}
+\newcommand{\metasplit}[3]{\text{split}~#1~#2~#3}
+\newcommand{\metaremovedim}[2]{\text{remove\_dim}~#1~#2}
+\newcommand{\metasplitdim}[3]{\text{split\_dim}~#1~#2~#3}
+
+% Meta symbols
+\newcommand{\funsym}{\mathcal{F}}
+\newcommand{\structsym}{\mathcal{S}}
+\newcommand{\dimsym}{\mathcal{d}}
+\newcommand{\accenvsym}{\mathrm{A}}
+\newcommand{\progsym}{\mathcal{P}}
+\newcommand{\memsym}{\mathcal{M}}
+\newcommand{\tylident}{\mathcal{k}}
+\newcommand{\anonident}{\code{\_}}
+
+\newcommand{\descend}{\emph{\textsc{Descend}}}
+
+% Semantics
+\newcommand{\store}{\mathcal{S}}
+\newcommand{\slot}[2]{\mathtt{\langle #1 \rangle^{#2}}}
+\newcommand{\execenv}[3]{\mathtt{\langle #1 \rangle^{#2}_{#3}}}
+\newcommand{\smallstep}[6]{\execenv{~ #1 \vartriangleright #2 \longrightarrow #3 \vartriangleright #4 ~}{#5}{#6} }
+\newcommand{\bigstep}[6]{\execenv{~ #1 \vartriangleright #2 \longrightarrow^{*} #3 \vartriangleright #4 ~}{#5}{#6} }
+% \subst{Store}{Location}{Value}{Lifetime}{Exec}
+%\newcommand{\subst}[4]{\mathtt{#1[#2 \mapsto \slot{#3}{#4}]}}
+\newcommand{\locate}[2]{\mathsf{loc}(\mathtt{#1, #2})}
+\newcommand{\loc}[3]{{#1}_{#2}^{#3}}
+
+%Values
+\newcommand{\Unit}{()}%%
+\newcommand{\eq}{=}

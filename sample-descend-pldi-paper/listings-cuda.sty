@@ -1,0 +1,75 @@
+\ProvidesPackage{listings-cuda}
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage{etoolbox}
+\RequirePackage[listings,skins]{tcolorbox}
+
+% taken and adjusted from listings-rust
+\lstdefinelanguage{CUDA}{%
+  sensitive%
+, morecomment=[l]{//}%
+, morecomment=[s]{/*}{*/}%
+, moredelim=[s][{\itshape\color[rgb]{0,0,0.75}}]{\#[}{], .}%
+, morestring=[b]{"}%
+%, alsodigit={.}% % avoid keyword being highlight in function name, e.g., for-all...
+, alsoother={}%
+, alsoletter={.} %treat . like a letter to allow for using it in keywords for example, BREAKS view highlighting
+%, otherkeywords={&, *},
+%
+%
+% [1] reserve keywords
+% [2] errors
+% [3] primitive types
+% [4] view constructors
+% [5] dimensions
+% [6] memories
+% [7] execution resource types
+% [8] kinds
+%
+, morekeywords={break, continue, else, for, if, in, match, return, while, do}  % control flow keywords
+, morekeywords={const}  % in the context of variables
+, morekeywords=[2]{error, |}% error messages
+, morekeywords=[3]{int, long, float, double, size_t}  % primitive types
+%
+, morekeywords=[4]{template, typename}% templates
+, morekeywords=[5]{blockIdx.x, blockIdx.y, blockIdx.y, threadIdx.x, threadIdx.y, threadIdx.z} % parallel Indeces
+, morekeywords={__global__, __shared__}
+}%
+
+\lstdefinestyle{colouredCUDA}%
+{ basicstyle=\ttfamily\footnotesize%\ttfamily%
+, identifierstyle=%
+, commentstyle=\color[gray]{0.4}%
+, stringstyle=\color[rgb]{0, 0, 0.5}%
+, keywordstyle=\color[RGB]{209,43,55} %\bfseries% reserved keywords
+, keywordstyle=[2]\color[rgb]{0.75, 0, 0}% errors
+, keywordstyle=[3]\color[RGB]{209,43,55}%base types
+, keywordstyle=[5]\color[RGB]{10,84,175}%CUDA
+, columns=spaceflexible%
+, keepspaces=true%
+, showspaces=false%
+, showtabs=false%
+, showstringspaces=true%
+}%
+
+\definecolor{cudayellow}{RGB}{208, 140, 0}
+\newtcblisting{CUDAListing}[1][]{%
+    enhanced,
+    listing only,
+    title={\scriptsize\texttt{CUDA}},
+    attach boxed title to top right={yshift=-\tcboxedtitleheight/2,xshift=-1em},
+    listing options={language=CUDA, style=colouredCUDA, breaklines=true, numbersep=2ex, #1},%listing options as of lstlistings
+    boxrule=.1mm,%thickness of box rule
+    colback=gray!5,%background color
+    left=.5em,%left margin
+    right=0pt,
+    coltitle=cudayellow,%color for title text
+    colbacktitle=gray!5,%backgroundcolor for title
+    boxed title style={%set options for title box as if it is just a box
+      boxrule=.1mm
+    },
+    bottom=0mm,
+    width=.98\linewidth,
+    enlarge left by=.02\linewidth,
+}

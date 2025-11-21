@@ -1,0 +1,89 @@
+\ProvidesPackage{listings-descend}
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage{xparse}
+\RequirePackage{etoolbox}
+\RequirePackage[listings,skins]{tcolorbox}
+
+% taken and adjusted from listings-rust
+\lstdefinelanguage{Descend}{%
+  sensitive%
+, morecomment=[l]{//}%
+, morecomment=[s]{/*}{*/}%
+, moredelim=[s][{\itshape\color[rgb]{0,0,0.75}}]{\#[}{], .}%
+, morestring=[b]{"}%
+%, alsodigit={.}% % avoid keyword being highlight in function name, e.g., for-all...
+, alsoother={}%
+, alsoletter={.} %treat . like a letter to allow for using it in keywords for example, BREAKS view highlighting
+, otherkeywords={&, *},
+%
+%
+% [1] reserve keywords
+% [2] errors
+% [3] primitive types
+% [4] view constructors
+% [5] dimensions
+% [6] memories
+% [7] execution resource types
+% [8] kinds
+%
+, morekeywords={break, continue, else, for, if, in, at, loop, match, return, while}  % control flow keywords
+, morekeywords={as, const, let, mut, uniq, shrd}  % in the context of variables
+, morekeywords={view, fn, where}  % in the context of declarations
+, morekeywords={sync}% synchronization
+, morekeywords={sched, split}% work assignment
+, morekeywords={unsafe}  % markers
+, morekeywords={do}  % reserved identifiers
+, morekeywords=[2]{error, |}% error messages
+, morekeywords=[3]{(), bool, char, f32, f64, i8, i16, i32, i64, isize, str, u8, u16, u32, u64, unit, usize, i128, u128, AtomicU32}  % primitive types
+%
+, morekeywords=[3]{}% additional types
+, morekeywords={to_view, take_left, take_right, group, map, transpose, reverse, tile} % views
+, morekeywords=[5]{X, Y, Z, XY, XZ, YZ, XYZ}% dimensions
+, morekeywords=[6]{gpu.global, gpu.shared, cpu.mem}% memories
+, morekeywords=[7]{gpu.grid, gpu.block, gpu.thread, cpu.thread} %execution resource types
+, morekeywords=[8]{nat, prv, mem, dty}%kinds
+}%
+
+\lstdefinestyle{colouredDescend}%
+{ basicstyle=\ttfamily\footnotesize%\ttfamily%
+, identifierstyle=%
+, commentstyle=\color[gray]{0.4}%
+, stringstyle=\color[rgb]{0, 0, 0.5}%
+, keywordstyle=\color[RGB]{209,43,55} %\bfseries% reserved keywords
+, keywordstyle=[2]\color[rgb]{0.75, 0, 0}% traits
+, keywordstyle=[3]\color[RGB]{10,84,175}%base types
+, keywordstyle=[4]\color[RGB]{52,150,175}% view constructors
+, keywordstyle=[5]\color[RGB]{208, 140, 0}% dimensions
+, keywordstyle=[6]\color[RGB]{72,160,0}% memories
+, keywordstyle=[7]\color[RGB]{10,84,175}% execution resource types
+, keywordstyle=[8]\color[RGB]{149, 56, 0}% kinds
+, columns=spaceflexible%
+, keepspaces=true%
+, showspaces=false%
+, showtabs=false%
+, showstringspaces=true%
+}%
+
+\definecolor{descendblue}{RGB}{10,84,175}
+\newtcblisting{DescendListing}[1][]{%
+    enhanced,
+    listing only,
+    title={\scriptsize\texttt{Descend}},
+    attach boxed title to top right={yshift=-\tcboxedtitleheight/2,xshift=-1em},
+    listing options={language=Descend, style=colouredDescend, breaklines=true, numbersep=2ex, #1},%listing options as of lstlistings, use frame=single for debugging
+    boxrule=.1mm,%thickness of box rule
+    colback=gray!5,%background color
+    % numbersep=5pt,
+    left=.5em,%left margin
+    right=0em,
+    coltitle=descendblue,%color for title text
+    colbacktitle=gray!5,%backgroundcolor for title
+    boxed title style={%set options for title box as if it is just a box
+      boxrule=.1mm
+    },
+    bottom=0mm,
+    width=.98\linewidth,
+    enlarge left by=.02\linewidth,
+}

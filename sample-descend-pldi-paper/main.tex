@@ -1,0 +1,1583 @@
+%%% eval: (setenv "LANG" "en_US.UTF-8")
+%%
+%% This is file `sample-manuscript.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `manuscript')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-manuscript.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%%
+%% The first command in your LaTeX source must be the \documentclass command. This is the generic manuscript mode required for submission and peer review.
+\documentclass[acmsmall]{acmart}
+% \settopmatter{printfolios=true,printccs=false,printacmref=false}
+%% To ensure 100% compatibility, please check the white list of
+%% approved LaTeX packages to be used with the Master Article Template at
+%% https://www.acm.org/publications/taps/whitelist-of-latex-packages 
+%% before creating your document. The white list page provides 
+%% information on how to submit additional LaTeX packages for 
+%% review and adoption.
+%% Fonts used in the template cannot be substituted; margin 
+%% adjustments are not allowed.
+%\usepackage{lua-visual-debug}
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+
+%%% The following is specific to PLDI '24 and the paper
+%%% 'Descend: A Safe GPU Systems Programming Language'
+%%% by Bastian Köpcke, Sergei Gorlatch, and Michel Steuwer.
+%%%
+\setcopyright{rightsretained}
+\acmDOI{10.1145/3656411}
+\acmYear{2024}
+\copyrightyear{2024}
+\acmSubmissionID{pldi24main-p187-p}
+\acmJournal{PACMPL}
+\acmVolume{8}
+\acmNumber{PLDI}
+\acmArticle{181}
+\acmMonth{6}
+\received{2023-11-16}
+\received[accepted]{2024-03-31}
+
+%% Bibliography style
+\bibliographystyle{ACM-Reference-Format}
+%% Citation style
+%% Note: author/year citations are required for papers published as an
+%% issue of PACMPL.
+\citestyle{acmauthoryear}   %% For author/year citations
+
+
+\newcommand{\todo}[1]{\textbf{TODO: #1}}
+\newcommand{\bastian}[1]{\marginpar{\textbf{Bastian: #1}}}
+\newcommand{\michel}[1]{\marginpar{\textbf{Michel: #1}}}
+
+\usepackage[utf8]{inputenc}
+\usepackage{dutchcal}
+
+% \usepackage{libertinus}
+\usepackage{pmboxdraw}
+\usepackage{setspace}
+
+\usepackage{natbib}
+\usepackage{stmaryrd}
+%\usepackage{amsfonts}
+%\usepackage{amsmath}
+%\usepackage{amsthm}
+\usepackage{mathrsfs}
+
+%\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+%define Definition environment
+% \theoremstyle{acmdefinition}
+\newtheorem{definition}{Definition}[section]
+
+% Fix error: Too many math alphabets used in version normal.
+% https://tug.org/pipermail/yandytex/2003-September/000368.html
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+%\usepackage{bm}
+% \usepackage{microtype}
+\usepackage{multirow}
+\usepackage[noabbrev,capitalise]{cleveref}
+\usepackage{syntax}
+\usepackage{enumitem}
+\usepackage{xspace}
+
+\usepackage{tikz}
+\usetikzlibrary{positioning,shapes,trees,arrows}
+\usetikzlibrary{arrows.meta}
+\def\checkmark{\tikz\fill[scale=0.4,fill=green](0,.35) -- (.25,0) -- (1,.7) -- (.25,.15) -- cycle;} 
+\def\cross{\tikz [x=1.4ex,y=1.4ex,line width=.4ex, red] \draw (0,0) -- (1,1) (0,1) -- (1,0);}
+
+\usepackage{array}%to be able to emphasize a column in tabular
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{minted}
+\usepackage{listings-cuda}
+\usepackage{listings-descend}
+\lstset{
+%   backgroundcolor=\color{},
+    commentstyle=\color{green},
+    stringstyle=\color{black!50!green},
+    %        identifierstyle=\color{red},
+    tabsize=2,
+    breaklines=true,
+    mathescape,
+    numbers=left,
+    escapechar={~(},
+    showstringspaces=false,
+    basicstyle=\ttfamily\footnotesize,
+    xleftmargin=-5pt,
+    xrightmargin=-5pt,
+    aboveskip=0pt,
+    belowskip=0pt,
+    frame=none,
+    %alsodigit={.} %treat . like a digit
+    numberstyle=\sffamily\scriptsize\color{darkgray},
+    captionpos=b
+}
+
+\input{macros}
+
+\newcommand{\GPU}{\textsc{gpu}}
+\newcommand{\CPU}{\textsc{cpu}}
+\newcommand{\CUDA}{\textsc{cuda}}
+
+\newcommand{\Descend}{\textsf{\textit{Descend}}\xspace}
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{\Descend: A Safe GPU Systems Programming Language}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+\author{Bastian Köpcke}
+\orcid{0000-0001-5271-6893}
+\affiliation{%
+  \institution{University of Münster}
+  \city{Münster}
+  \country{Germany}
+}
+\email{bastian.koepcke@uni-muenster.de}
+
+\author{Sergei Gorlatch}
+\orcid{0000-0003-3857-9380}
+\affiliation{%
+  \institution{University of Münster}
+  \city{Münster}
+  \country{Germany}
+}
+\email{gorlatch@uni-muenster.de}
+
+\author{Michel Steuwer}
+\orcid{0000-0001-5048-0741}
+\affiliation{%
+    \institution{Technische Universität Berlin}
+    \city{Berlin}
+    \country{Germany}
+}
+\email{michel.steuwer@tu-berlin.de}
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+%\renewcommand{\shortauthors}{Trovato and Tobin, et al.}
+
+%%
+%% The abstract is a short summary of the work to be presented in the
+%% article.
+\begin{abstract}
+Graphics Processing Units (GPU) offer tremendous computational power by following a throughput oriented paradigm where many thousand computational units operate in parallel.
+Programming such massively parallel hardware is challenging.
+Programmers must correctly and efficiently coordinate thousands of threads and their accesses to various shared memory spaces.
+Existing mainstream GPU programming languages, such as CUDA and OpenCL, are based on C/C++ inheriting their fundamentally unsafe ways to access memory via raw pointers.
+This facilitates easy to make, but hard to detect bugs, such as \emph{data races} and \emph{deadlocks}.
+
+In this paper, we present \Descend: a safe GPU programming language.
+In contrast to prior safe high-level GPU programming approaches, \Descend{} is an imperative GPU \emph{systems programming language} in the spirit of Rust, enforcing safe CPU and GPU memory management in the type system by tracking \emph{Ownership} and \emph{Lifetimes}.
+\Descend introduces a new \emph{holistic GPU programming} model where computations are hierarchically scheduled over the GPU's \emph{execution resources}: grid, blocks, warps, and threads.
+\Descend's extended \emph{Borrow} checking ensures that execution resources safely access memory regions without data races.
+For this, we introduced \emph{views} describing safe parallel access patterns of memory regions, as well as \emph{atomic} variables.
+{
+\addfontfeatures{LetterSpace=-2.0}
+For memory accesses that can't be checked by our type system, users can annotate limited code sections as $\code{unsafe}$.
+}
+
+We discuss the memory safety guarantees offered by \Descend{} and evaluate our implementation using multiple benchmarks, demonstrating that \Descend{} is capable of expressing real-world GPU programs showing competitive performance compared to manually written CUDA programs lacking \Descend{}'s safety guarantees.\end{abstract}
+
+%%
+%% The code below is generated by the tool at http://dl.acm.org/ccs.cfm.
+%% Please copy and paste the code instead of the example below.
+%%
+\begin{CCSXML}
+<ccs2012>
+   <concept>
+       <concept_id>10011007.10011006.10011008.10011009.10010175</concept_id>
+       <concept_desc>Software and its engineering~Parallel programming languages</concept_desc>
+       <concept_significance>500</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10011007.10011006.10011008.10011009.10011010</concept_id>
+       <concept_desc>Software and its engineering~Imperative languages</concept_desc>
+       <concept_significance>300</concept_significance>
+       </concept>
+   <concept>
+       <concept_id>10003752.10003790.10002990</concept_id>
+       <concept_desc>Theory of computation~Logic and verification</concept_desc>
+       <concept_significance>300</concept_significance>
+       </concept>
+ </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Software and its engineering~Parallel programming languages}
+\ccsdesc[300]{Software and its engineering~Imperative languages}
+\ccsdesc[300]{Theory of computation~Logic and verification}
+
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{GPU programming, language design, memory safety, type systems}
+
+% \received{20 February 2007}
+% \received[revised]{12 March 2009}
+% \received[accepted]{5 June 2009}
+
+%%
+%% This command processes the author and affiliation and title
+%% information and builds the first part of the formatted document.
+\maketitle
+\section{Introduction}
+\label{sec:intro}
+Graphics Processing Units (GPUs) are massively parallel hardware devices with a throughput oriented design that prioritizes the runtime of the overall computation performed in parallel by thousands of collaborating threads over single thread performance, as classical CPUs do~\cite{DBLP:journals/cacm/GarlandK10}.
+This has made GPUs attractive devices in many domains where high performance is crucial, such as in scientific simulations, medical imaging, and most prominently, machine learning.
+
+Writing correct and efficient software for GPUs is challenging even for advanced programmers.
+The predominant languages for general purpose GPU programming, CUDA and OpenCL, are low-level imperative \emph{systems programming languages}, giving programmers great control to precisely influence how each thread accesses memory and when it performs which computational instructions.
+This control is needed to extract the expected high performance from GPUs, where the difference between an unoptimized naive implementation and a fully optimized implementation can be up to two orders of magnitude~\cite{10.1145/3570638}--- often significantly more than on CPUs.
+
+Unfortunately, in CUDA and OpenCL, this level of control comes with significant challenges for GPU programmers.
+As both languages are based on C/C++ they inherit their fundamentally unsafe ways to access memory via raw pointers.
+Furthermore, to coordinate threads and ensure a consistent view of the memory, manual synchronization primitives must be used correctly.
+This leads to easy-to-make, but often hard to detect bugs, particularly race conditions when accessing the same memory from multiple threads and deadlocks when using synchronization incorrectly.
+
+\Cref{lst:cuda-transpose-example} shows a CUDA kernel function, executed in parallel on the GPU to transpose a matrix.
+In lines 4--5, each thread copies four matrix elements into a buffer and then---after a synchronization---copies the transposed elements to the output.
+The correctness of this function depends on correct indexing which is notoriously tricky.
+In fact, \cref{lst:cuda-transpose-example} contains a subtle bug:
+In line 4, $\code{threadIdx.y+j}$ should be enclosed by parenthesis, so that both terms are multiplied by 32.
+As a result, a data race occurs as multiple threads will write uncoordinated into the same memory location.
+
+\begin{listing}[t]
+  \begin{CUDAListing}
+__global__ void transpose(const double *input, double *output) {
+    __shared__ float tmp[1024];
+    for (int j = 0; j < 32; j += 8) {
+        tmp[threadIdx.y+j *32+threadIdx.x] =
+            input[(blockIdx.y*32+threadIdx.y+j)*2048 + blockIdx.x*32+threadIdx.x]; }
+    __syncthreads();
+    for (int j = 0; j < 32; j += 8) {
+        output[(blockIdx.x*32+threadIdx.y+j)*2048 + blockIdx.y*32+threadIdx.x] =
+            tmp[threadIdx.x*32+threadIdx.y+j]; } }
+  \end{CUDAListing}
+  \vspace{-0.5cm}
+  \caption{A CUDA matrix transposition GPU kernel. A subtle indexing bug in line 4 leads to a data race.}
+  \label{lst:cuda-transpose-example}
+  \end{listing}
+
+Rust has demonstrated that a systems programming language can be designed in a memory safe way without losing low-level control.
+It prevents data races, by forbidding the concurrent access of threads to a memory resource if at least one thread is allowed to mutate it~\cite{DBLP:journals/cacm/JungJKD21}.
+Rust enforces this with its type system, specifically with \emph{borrow} checking, that interacts with the concepts of \emph{ownership} and \emph{lifetimes} which primarily ensure safe memory management.
+Could Rust have prevented the bug in \cref{lst:cuda-transpose-example}?
+Clearly, $\code{tmp}$ is shared among the parallel executing threads and, clearly, we mutate its content in line 5.
+Therefore, Rust would reject this kernel, without even attempting to investigate if the indexing is safe, as Rust's type system has no capabilities of reasoning about safely accessing an array in parallel by multiple threads.
+
+\begin{listing}[t]
+\begin{DescendListing}
+fn transpose(input:  &gpu.global [[f64;2048];2048], output: &uniq gpu.global [[f64;2048];2048],
+             [grid.blocks.forall(X).forall(Y)] tmp: &uniq gpu.shared [[f64;32];32]
+) -[grid: gpu.grid<XY<64,64>,XY<32,8>>]-> () {
+  sched(Y,X) block in grid {
+    sched(Y,X) thread in block {
+      for i in 0..4 {
+        tmp.group_by_row::<32,4>[[thread]][i] =
+          input.group_by_tile::<32,32>.transpose[[block]].group_by_row::<32,4>[[thread]][i] };
+      sync(block);
+      for i in 0..4 {
+        output.group_by_tile::<32,32>[[block]].group_by_row::<32,4>[[thread]][i] =
+          tmp.group_by_row::<32,4>[[thread]][i] } } } }
+\end{DescendListing}
+\vspace{-0.5cm}
+\caption{A \Descend{} function performing a memory safe matrix transposition.}
+\label{lst:descend-transpose-example}
+\end{listing}
+
+In this paper, we introduce \Descend{}, a safe GPU programming language adapting and extending the ideas of Rust towards GPU systems.
+In contrast to prior safe GPU programming approaches, such as Futhark~\cite{DBLP:conf/pldi/HenriksenSEHO17}, \Descend{} is an imperative systems programming language empowering programmers to exercise low-level control with a safety net.
+
+\Cref{lst:descend-transpose-example} shows the matrix transposition function in \Descend{}.
+In contrast to CUDA, this function is not implicitly executed by thousands of GPU threads, instead this function is executed by the (\emph{one}) GPU grid.
+Programmers describe the hierarchical scheduling of the computation over the \emph{grid}, first by describing the scheduling of \emph{blocks} (line~4) and then the nested \emph{threads} (line~5).
+Each $\code{block}$ has access to its own shared memory that is passed into the function in line~2.
+Each $\code{thread}$ performs the same copies as in CUDA, first from the input into the temporary buffer, and then---after a synchronization--- back into the output.
+Instead of raw indexing, in \Descend{} programmers use memory \emph{views} to describe parallel accesses into memory.
+\Descend{} statically ensures that accesses into views are safe, and treats them specially in the type system.
+This restricts memory accesses to safe parallel access patterns.
+Compositions of views allow for describing complex memory accesses.
+For the example, the borrow checking of \Descend{} is capable to statically determine that the parallel write access into the shared temporary buffer and the output are safe.
+Similarly, \Descend{} statically enforces the correct use of the synchronization, that cannot be forgotten or placed incorrectly.
+
+\Descend{} is a holistic programming language for heterogeneous systems comprised of CPU and GPU.
+The physically separated memories of CPU and GPU are reflected in the types of references for which \Descend{} enforces that they are only dereferenced in the correct execution context.
+Functions are annotated with an \emph{execution resource} (as seen in the function signature in line~3) indicating how a function is executed.
+These annotations make important assumptions, that are implicit in CUDA, about how many threads and blocks execute a kernel, explicit and enforceable by the type system.
+
+With \Descend{}, we explore one new point in the design space of GPU programming languages, aiming to uniquely combine the imperative nature and low-level control with the safety so-far only found in higher level GPU programming approaches.
+As we will see in this paper, \Descend{} empowers programmers to safely control low-level details including memory layout and which thread accesses which memory location when.
+This allows expressing GPU algorithms safely, that cannot be described natively by the user and are built-in in existing safe GPU approaches.
+
+\smallskip
+
+In summary, this paper makes the following contributions:
+\begin{itemize}
+  \item we introduce \Descend{}, a safe GPU systems programming language in the spirit of Rust;
+  \item we identify the challenges of GPU programming and discuss how \Descend{} assists in  addressing them (\Cref{sec:gpu-programming-difficult});
+  \item we discuss how the concepts of \emph{execution resources}, \emph{place expressions}, and memory \emph{views} provide the bases for enforcing memory safety, and how \emph{atomics} and \emph{unsafe} enable escaping the restrictive safe \Descend{} code when required (\Cref{sec:descend});
+  \item we present \Descend{}'s formal type system and extended borrow checking (\Cref{sec:descend-types});
+  \item and show in an experimental evaluation that programs written in \Descend{} achieve the same performance as equivalent programs written in CUDA, that lack \Descend{}'s safety guarantees (\Cref{sec:eval}).
+\end{itemize}
+We discuss related work and conclude in sections \ref{sec:relatedWork} and \ref{sec:conclusion}.
+\pagebreak
+\section{Challenges of GPU Programming}
+\label{sec:gpu-programming-difficult}
+GPU programming brings a number of challenges, that we group in two areas:
+\emph{1)} challenges from working with the execution and memory hierarchies of GPUs, such as thousands of threads grouped in blocks accessing various GPU memories; and
+\emph{2)} challenges from coordinating the heterogeneous system, such as transferring data between CPU and GPU memory.
+%
+Before we discuss each area, we give a brief overview of the traditional GPU programming model established by CUDA.
+
+CUDA is a sophisticated programming language with many advanced features that have been added over years to keep pace with evolving hardware capabilities.
+In this paper, we focus on a subset of the CUDA features to capture the core essence of CUDA and model it in \Descend{}.
+Therefore, we focus our discussion in this section on these core features and point out significant advanced features of CUDA, that we hope we will be able to model with \Descend{} in the future.
+
+\subsection{The CUDA GPU Programming Model}
+In CUDA, programmers write \emph{kernel} functions that are executed in parallel on the GPU.
+These functions are executed by many thousands of threads, all executing the same code.
+Therefore, on a first view, the CUDA programming model resembles traditional data-parallel programming models, where a single instruction is applied to multiple data elements in lock-step.
+However, in CUDA this strict requirement is relaxed as code can branch based on the \emph{thread index} that identifies the individual thread.
+It is usually used for indexing into arrays so that each thread processes a different array element.
+Thread indices are integers used to index plain C-style arrays, making statically checking the safety of parallel memory accesses challenging and leading to data races being introduced easily.
+Furthermore, kernels are often written with implicit assumptions about how many threads execute them, making kernels hard to understand without knowing these assumptions which are an additional source of bugs, when CPU and GPU code diverge over time.
+
+GPUs are comprised of multiple Streaming Multiprocessors (SM), each capable of executing groupings of 32 parallel \emph{threads}, called \emph{warps}, simultaneously.
+Threads are hierarchically organized into groups, that are executed independently by the SMs.
+In CUDA, such groups of threads are called \emph{blocks}.
+The collection of all blocks is called the \emph{grid}.
+
+Similarly, memory is organized hierarchically as well and closely connected to the execution hierarchy.
+In software, separate \emph{address spaces} reflect the different kinds of GPU memory.
+The slowest and largest memory is \emph{global memory}, which is accessible by each thread in the entire grid.
+Each block provides the fast \emph{shared memory} which is accessible only by each thread in the block.
+Lastly, each thread has exclusive access to its own and fastest \emph{private memory}.
+Data transferred from the host to the GPU is always stored in global memory.
+In order to exploit the faster memories, data has to be copied explicitly between address spaces.
+
+
+\subsection{Challenges of the Execution \& Memory Hierarchies}
+The CUDA programming model with its execution and memory hierarchies, resembles closely the GPU hardware and enables scalability of GPU programs, but it comes with two major challenges:
+how to avoid \emph{data races} and how to correctly \emph{synchronize} the threads of a block.
+
+\paragraph{Data Races.}
+Data races occur when multiple threads simultaneously access the same memory location and at least one performs a write.
+It is easy to create a data race in CUDA:\\[-2em]
+\begin{CUDAListing}
+__global__ void rev_per_block(double *array) {
+  double *block_part = &array[blockIdx.x * blockDim.x];
+  block_part[threadIdx.x] = block_part[blockDim.x-1 - threadIdx.x]; }
+\end{CUDAListing}
+In this example, that is inspired by a bug in a real-world kernel described by \citet{DBLP:conf/icse/WuOZZ0Z20}, the input $\code{array}$ is split into independent parts for each block.
+Then the threads in each block access a single element in the reverse order of their thread index and write the value back into the array at their thread index.
+This creates a data race:
+a thread may still be reading a value from an index that another thread is already writing to.
+%
+In \Descend{}, the compiler recognizes the possibility of a data race and would reject the program with an error message:\\[-1em]
+\begin{DescendListing}
+error: conflicting memory access
+  | arr[[thread]] = arr.rev[[thread]];
+  |                 ^^^^^^^^^^^^^^^^^-------------------
+  | ^^^^^^^^^^^^^ cannot select memory because of a conflicting prior selection here
+\end{DescendListing}
+
+We will explain in \cref{sec:descend}, that for this check \Descend{} performs an extended \emph{borrow (or access) checking} similar to Rust, tracing which memory location (formalized as \emph{place expressions}) is accessed by which thread (formalized as \emph{execution resources}).
+To make this check feasible, in \Descend{} parallel memory accesses are performed via \emph{views}, which are safe parallel access patterns, such as $\code{rev}$ for reverse in this example.
+Views can be composed to enable complex parallel access patterns that are still known to be safe.
+
+\paragraph{Synchronization.}
+To avoid data races, CUDA provides various forms of barriers.
+Originally, CUDA provided only barriers for synchronizing threads within the same warp or block.
+We will focus on modelling these barriers in this paper.
+More recent versions of CUDA have added support for grid-wide and partial barriers and 
+the underlying GPU supports even more sophisticated barriers, such as named and producer-consumer barriers \cite{DBLP:conf/ppopp/BauerTA14}.
+To avoid undefined behavior, when using a barrier, each participating thread must reach that barrier.
+Unfortunately, it is easy to violate this requirement, such as for this block-wide barrier:\\[-1em]
+\begin{CUDAListing}[numbers=none]
+__global__ kernel(...) { if (threadIdx.x < 32) { __syncthreads() } }
+\end{CUDAListing}
+In this CUDA kernel, the $\code{\_\_syncthreads}$ barrier is executed only by threads that have an index smaller than $32$ within each block.
+When launched with more than $32$ threads per block, the behavior of the program is undefined.
+%
+In \Descend{}, a program such as this would not compile, if there are more than $32$ threads per block, failing with an error message:\\[-1em]
+\begin{DescendListing}
+error: barrier not allowed here
+  | first_32_threads => { sync }
+  |                       ^^^^ `$\texttt{sync}$` not performed by all threads $\texttt{in}$ the block ------
+  |    split(X) block at 32 {
+  |    ^^^^^^^^^^^^^^^^^^^^ `block` is $\texttt{split}$ here
+\end{DescendListing}
+
+We will discuss in \Cref{sec:descend}, how the compiler checks that synchronizations are performed correctly.
+In \Descend{}, either all threads in a block perform the same instructions (when using the $\code{sched}$ syntax seen before), or the threads in a block must be split using the syntax shown in the error message above.
+A synchronization performed on a split block or a conditional is forbidden.
+\Descend{} also ensures that synchronizations are not forgotten.
+A synchronizations releases borrows of the synchronized memories which, if forgotten, are flagged by the borrow checker as seen above.
+
+
+\subsection{Challenges of Heterogeneity}
+GPUs are not programmed only by writing kernels.
+They are part of a heterogeneous system, with the CPU and GPU performing computations asynchronously and the CPU managing the computations on the GPU.
+Two significant challenges arise from this:
+the handling of the physically \emph{separated memories} on CPU and GPU,
+and dealing with \emph{shared assumptions} between CPU and GPU that are often not explicitly encoded and can break correctness in subtle ways.
+
+\paragraph{Separated Memories.}{
+The CPU and GPU are physically distinct devices with separate memories.
+Data can either be transferred explicitly or implicitly between these memories.
+To enable implicit data transfers, CUDA 6 introduced CUDA Unified Memory that unifies the virtual address spaces of CPU and GPU pointers.
+Multiple studies have investigated the performance of CUDA Unified Memory \cite{DBLP:journals/tjs/KnapC19, DBLP:conf/ccgrid/LiJCS15,DBLP:conf/hpec/LandaverdeZCH14} and found that it can result in performance overheads (and sometimes performance benefits) depending on the application's memory access patterns.
+%
+Controlling data transfers explicitly remains an important and widely used method until today.
+We are focusing on modelling explicit memory transfers in this paper, adding implicit memory transfers to \Descend{} is left for future work.
+
+When transferring data between the CPU and GPU explicitly, a \emph{host} thread that is running on the CPU uses an API to initiate the memory transfer.
+The host program only accesses CPU memory, while a GPU program only accesses its various GPU memories.
+Programmers are responsible for keeping track of which pointers point into the CPU or GPU memory.
+This makes it easy for programmers to make mistakes that are not caught by the compiler, such as misusing the provided API for copying data to the GPU:\\[-1.5em]
+\begin{CUDAListing}[numbers=none]
+cudaMemcpy(d_vec, h_vec, size, cudaMemcpyDeviceToHost);
+\end{CUDAListing}
+Function $\code{cudaMemcpy}$ copies $\code{size}$ many bytes to the destination in the first argument from the source in the second argument.
+The last argument specifies whether the destination and source are on the device or host.
+In the above call, destination and source pointers are swapped, which leads to the address in the host pointer being used to access memory on the device, with undefined behavior.
+%
+In \Descend{}, reference types carry additional information and correct usage is strictly enforced.
+Making the same mistake as above, leads to a compile-time error message:\\[-1.5em]
+\begin{DescendListing}
+error: mismatched types
+  | copy_mem_to_host(d_vec, h_vec);
+  |                  ^^^^^ expected reference to `gpu.global`, found reference to `cpu.mem`
+\end{DescendListing}
+
+In CUDA, without using Unified Memory, special allocation APIs, or a CUDA-aware allocator in the operating system, it is possible to allocate memory in CPU memory and pass the CPU pointer to the GPU.
+The GPU kernel may then accidentally attempt to access CPU memory directly, as in the following code:\\[-1.5em]
+\begin{CUDAListing}
+void host_fun() { double *vec = malloc(sizeof(double) * N * N);  init_kernel<<<N, N>>>(vec); }
+__global__ void init_kernel(double *vec) { vec[globalIdx.x] = 1.0; }
+\end{CUDAListing}
+In this example, the host allocates space for an array in the CPU main memory and passes the resulting pointer to the GPU.
+The GPU program then attempts to initialize the memory, but it has no access to the separated main memory, leading to undefined behavior.
+With full support of CUDA Unified Memory, this program is well-defined, as the GPU would directly access the CPU main memory, resulting in an implicit memory transfer.
+%
+In the initial version of \Descend{}, a program such as this would be rejected by the compiler because it recognizes that we are attempting to access CPU memory on the GPU.
+The equivalent Descend program fails like this:\\[-1.5em]
+\begin{DescendListing}
+error: cannot dereference `*vec` pointing to `cpu.mem`
+  |  (*vec)[[thread]] = 1.0
+  |   ^^^^ dereferencing pointer $\texttt{in}$ `cpu.mem' memory --------------------
+  |    sched(X) thread in grid.to_threads {
+  |             ^^^^^^ executed by `gpu.Thread`
+\end{DescendListing}
+}
+In \Cref{sec:descend}, we introduce \emph{execution resources} that identify \emph{who} executes a piece of code with a focus on the GPU.
+However, these also extend to CPU threads.
+The formal type system, introduced in \Cref{sec:descend-types}, extends references with \emph{memory annotations}  that strictly enforce that memory is only dereferenced in the correct execution context.
+
+\paragraph{Shared Assumptions between CPU and GPU}{
+In CUDA---and \Descend{}---when launching a function on the GPU, the host thread specifies the launch configuration, i.e., the number of threads executing the kernel and their grouping into blocks.
+For GPU functions, there are often implicit assumptions about the number of threads that are going to execute the function as well as the amount of memory that is allocated via the host's memory API.
+But these assumptions are easily violated on either the CPU or GPU side, such as for this GPU function scaling a vector:\\[-1.5em]
+\begin{CUDAListing}[numbers=none]
+__global__ scale_vec_kernel(double *vec) { vec[globalIdx.x] = vec[globalIdx.x] * 3.0; }
+\end{CUDAListing}
+Each GPU thread accesses a single element of the vector at its index within the entire grid.
+The assumption made here, is that the grid contains as many threads as there are elements in the vector.
+For example, the following launch of the GPU function from the CPU is erroneous:\\[-1.5em]
+\begin{CUDAListing}
+cudaMalloc(&d_ptr, SIZE);
+...
+scale_vec_kernel<<<1, SIZE>>>(d_ptr);
+\end{CUDAListing}
+Instead of starting as many threads as there are vector elements, the function is executed by as many threads as there are \emph{bytes} in the vector.
+By launching the GPU function with more threads than vector elements, out-of-bounds memory accesses are triggered.
+%
+In \Descend{}, calling a GPU program with the wrong number of threads leads to an error message at compile time:\\[-1.5em]
+\begin{DescendListing}
+error: mismatched types
+  |  scale_vec<<<X<1>, X<SIZE>>>>(d_vec);
+  |                               ^^^^^ expected `[f64; SIZE]`, found `[f64; ELEMS]`
+\end{DescendListing}
+
+We will see in \Cref{sec:descend}, that all functions are annotated with an execution resource describing how the function expects to be executed.
+This makes assumptions explicit.
+The type system, presented in \Cref{sec:descend-types}, enforces this at compile time.
+
+\section{Safe GPU programming with \Descend{}}
+\label{sec:descend}
+In this section, we discuss the technical mechanism that \Descend{} uses to guarantee memory safety and produce the error messages seen in the previous section.
+We first give explanations and intuitions, before we will present the most important aspects of the formal type system of \Descend{} in \Cref{sec:descend-types}.
+We start by introducing \emph{execution resources}, \emph{place expressions}, and \emph{views} as the central ingredients to formally reason about the execution and memory hierarchy, and to check that parallel memory accesses are performed safely.
+
+\subsection{Execution Resources}
+As shown in the previous section, the correctness of a GPU program often depends on the specific grid of blocks and threads that executes it.
+Depending on the number of threads that the kernel is executed with, a memory location may or may not be accessed by multiple threads at the same time, memory accesses may go out-of-bounds or the kernel may simply not compute a complete result.
+Furthermore, some instructions are required to be executed by specific sets of threads.
+For example, the barrier $\code{\_\_syncthreads}$ must be executed by all threads within a block, and the warp-shuffle instruction $\code{\_\_shufl\_sync}$ that moves values between threads without using slow global or shared memory, must be executed by a subset of threads within the same warp.
+
+In traditional GPU languages, the grid is specified when the GPU kernel is executed.
+The kernel itself has no static knowledge about the grid and can only dynamically refer to its dimensions or blocks and threads.
+In addition, a kernel is often not safe for many possible configurations of grids.
+
+To enable reasoning statically about the execution of GPU functions, \Descend{} introduces \emph{execution resources}, which represent groupings of blocks and threads.
+The type system uses execution resources to track whether values are owned or instructions are executed by the entire grid, specific blocks, warps or individual threads.
+For this, we need to be able to syntactically compare execution resources, which is the reason to define them with a formal syntax.
+
+\paragraph{Formal Syntax of Execution Resources}
+{%
+% \floatstyle{boxed}
+% \restylefloat{figure}
+\begin{figure}[b]
+  \footnotesize
+\begin{tcolorbox}[
+    colback=white,
+    sharp corners,boxrule=0.2mm,
+    left=-1em,right=0mm,top=0mm,bottom=0mm,
+    enlarge bottom by=-0.5cm,
+    enlarge top by=-0.5cm,
+    ]
+\begin{tabular}{l | l}
+\begin{tabular}[t]{ l c l >{\em\hspace{-3mm}}r }
+  \tentry{ e }{ \sdef }{}{ Execution Resources: }
+  \tentry{}{}{ y }{ identifier }
+  \tentry{}{}{\code{cpu.thread}}{ CPU Thread }
+  \tentry{}{}{\code{gpu.grid\langle \di, \di \rangle}}{ GPU Grid }
+  \tentry{}{}{e.\code{blocks}\langle c; \overline{[\eta..\eta]_d}\rangle}{ blocks }
+  \tentry{}{}{e.\code{warps}\langle c; \overline{[\eta..\eta]}\rangle}{ warps }
+  \tentry{}{}{e.\code{threads}\langle c; \overline{[\eta..\eta]_d}\rangle}{ threads }
+  \tentry{}{}{e.\code{forall}(d) }{ forall }
+  \tentry{}{}{e[\eta..\eta]_d }{ sub-selection }
+
+  \tentry{ d }{ \sdef }{ \code{x} \opt \code{y} \opt \code{z} }{ Dim-Selector }
+\end{tabular}
+&
+\begin{tabular}[t]{l c l >{\em\hspace{-2mm}}r }
+  \tentry{ \di }{ \sdef }{}{ Dimensions: }
+  \tentry{}{}{\xyz{\eta}{\eta}{\eta}}{ 3-dim }
+  \tentry{}{}{\xy{\eta}{\eta} \opt \xz{\eta}{\eta} \opt \yz{\eta}{\eta}}{ 2-dim }
+  \tentry{}{}{\x{\eta} \opt \y{\eta} \opt \z{\eta}}{ 1-dim }
+
+  \tentry { \eta }{ \sdef }{}{ Natural Numbers: }
+  \tentry {}{}
+          { n }{ identifier }
+  \tentry {}{}
+          { \underline{\eta} }{ literal }
+  \tentry {}{}
+          { \eta \oplus \eta }{ binary operation }
+
+  \tentry{ c }{ \sdef }{ \code{cond} \opt \code{all}}{ conditional select }
+\end{tabular}
+\end{tabular}
+\end{tcolorbox}%
+  \caption{Grammar for Execution Resources and Dimensions}
+  \label{syn:execs}
+\end{figure}
+}
+\Cref{syn:execs} shows the formal grammar of execution resources.
+Identifiers are abstract execution resources.
+The execution resource $\code{cpu.thread}$ represents a single thread on the CPU.
+The $\code{gpu.grid}$ stores two \emph{dimensions} $d$ that describe the up to three-dimensional shape of the blocks.
+The size of a dimension is represented as a natural number $\eta$ that can either be a constant, a variable, or simple mathematical expressions over natural numbers.
+For example, a two-dimensional grid that consists of $2\times 2$ blocks, where each block consist of $4\times 4$ threads, is represented as: $\code{gpu.grid}\langle \xy{2}{2}, \xy{4}{4} \rangle$.
+To refer to all blocks of the grid we write:
+%\vspace{-.5em}
+\begin{equation*}
+  \code{gpu.grid}\langle \xy{2}{2}, \xy{4}{4}\rangle\code{.blocks}\langle\code{all}; \code{xy}\langle[0..2],[0..2]\rangle\rangle
+\end{equation*}
+%\vspace{-2em}
+In case we select everything, we use a simplified notation: $e.\code{blocks} = e.\code{blocks}\langle\code{all}; \code{xy}\langle[..][..]\rangle\rangle$.
+
+Analogously, we refer to collections of threads or a one-dimensional collection of warps (which in-turn consist of a one-dimensional collection of threads).
+Using the \emph{conditional selection}, we represent when only a subset of threads (or blocks, or warps) has been selected based on a runtime condition.
+This is important when detecting if a synchronization is safe or might lead to a deadlock.
+
+Using \emph{forall}, we quantify over a dimension, representing, e.g., a slice of blocks sharing the same index in one dimension.
+In a naive matrix-multiplication implementation, each row of blocks within the grid takes ownership over all the rows of the output matrix for which the block's threads compute a result.
+In order to express this, we need a way of referring to each row of blocks separately. 
+Each row of blocks is represented by quantifying over the $\code{y}$-dimension of blocks: 
+\begin{equation*}
+  \code{gpu.grid}\langle \xy{2}{2}, \xy{4}{4}\rangle\code{.blocks}\code{.forall}(\code{y})
+\end{equation*}
+Lastly, the \emph{sub-selection} operator changes the amount of selected sub-execution resources in a given dimension.
+This is useful in many scenarios.
+For example, to perform a reduction in a single block, some data is accumulated iteratively.
+With each iteration, the number of threads performing accumulations is halved.
+This means that only a subset of threads within the block is active, which we can represent as: $ \code{block}[0..(4/2^i)]_\code{x}$ where $i$ is the iteration index.
+
+
+With \emph{execution resources} we have a simple yet powerful formal way of referring to collections of blocks and threads within a multidimensional grid.
+Next, we have a look at how execution resources are managed in \Descend{}.
+
+\paragraph{Scheduling over Execution Resources}
+In \Descend{} execution resources are not specified freely anywhere in the program.
+Instead, users schedule computations over every dimension of the highest level in the execution hierarchy.
+In the following example code, we execute a function with a two-dimensional GPU grid of $2\times{}2$ blocks, each comprised of $4\times{}4$ threads.
+\vspace{-1em}
+\begin{DescendListing}
+fn f(...) -[grid: gpu.Grid<XY<2,2>,XY<4,4>>]-> (){
+  sched(Y) blockRow in grid.blocks {
+    sched(X) block in blockRow {
+      split(Y) block.threads at 1 {
+        fstThreadGroup => ... 
+        sndThreadGroup => ... } } } }
+\end{DescendListing}
+
+Here, $\code{grid}$ is the execution resource that executes function $\code{f}$.
+The type annotation in line 1 specifies the shape of the grid.
+The body of the function is executed by the function's execution resource, so in this case, the entire grid.
+In line 2, we \emph{schedule} the nested computation over all groups of blocks in the grid with the same $\code{y}$-dimension (rows of blocks).
+For that we specify the execution resource to schedule over ($\code{grid.blocks}$) and provide an identifier ($\code{blockRow}$) to refer to the sub-execution resources.
+\Descend{} requires scheduling over the outer hierarchy levels completely before further scheduling computations within the inner levels.
+This means, that rows of blocks are not allowed to schedule computations over threads.
+Instead, a row of blocks must schedule the following computations over all blocks in the $\code{x}$-dimension.
+The scheduled identifier $\code{block}$ is equivalent to execution resource $\code{gpu.grid}\langle\xy{2}{2},\xy{4}{4}\rangle.\code{forall(y)}.\code{forall(x)}$.
+Only when scheduling computations within a single block are we allowed to refer to the threads in the block.
+In line 4, each block splits the collection of its threads into two execution resources at index $1$ along the $\code{y}$-dimension.
+$\code{fstThreadGroup}$ contains all threads with a thread index less than $1$ in $\code{y}$-dimension.
+$\code{sndThreadGroup}$ contains the rest.
+The identifier $\code{fstThreadGroup}$, is equivalent to the following execution resource:
+\begin{equation*}
+  \code{gpu.grid}\langle\xy{2}{2},\xy{4}{4}\rangle.\code{blocks.forall(y)}.\code{forall(x).threads}[0..1]_\code{y}
+\end{equation*}
+
+
+The execution resources introduced here have three main purposes:
+\emph{1)} they are used to checking what code is executed on the CPU and GPU;
+\emph{2)} they are used to checking which instructions are executed by which part of the GPU hierarchy, such as barrier synchronization must be executed inside a block;
+\emph{3)} they keep track of dimensions and sizes that are used in the code generation.
+
+
+\subsection{Place Expressions and Views}
+\label{sec:place-expressions}
+{
+\addfontfeatures{LetterSpace=-2.0}
+To reason about memory locations and safe memory accesses we define \emph{Place Expressions} and \emph{Views}.
+}
+
+{%
+% \floatstyle{boxed}
+% \restylefloat{figure}
+\begin{figure}
+  \small
+\begin{tcolorbox}[
+    colback=white,
+    sharp corners,boxrule=0.2mm,
+    left=-1em,right=0mm,top=0mm,bottom=0mm,
+    enlarge bottom by=-0.5cm,
+    % enlarge top by=-0.5cm,
+    ]
+\centering
+\begin{tabular}{ l | l }
+\begin{tabular}[t]{ l c l >{\em}r }
+\tentry{ p }{ \sdef }{}{ Place Expressions: }
+\tentry{}{}{ x }{ variable }
+\tentry{}{}{p.\code{fst} \opt p.\code{snd}}{ projections }
+\tentry{}{}{*p}{ dereference }
+\tentry{}{}{p[\eta]}{ index }
+\tentry{}{}{p\llbracket e \rrbracket}{ select }
+\tentry{}{}{p.v}{ view }
+\end{tabular}
+  &
+\begin{tabular}[t]{ l c l >{\em}r }
+\tentry{ v }{ \sdef }{}{ Views }
+\tentry{}{}{ \code{group{::}}\langle\eta\rangle }{}
+\tentry{}{}{ \code{take\_left{::}}\langle\eta\rangle }{}
+\tentry{}{}{ \code{take\_right{::}}\langle\eta\rangle }{}
+\tentry{}{}{ \code{transpose} }{}
+\tentry{}{}{ \code{reverse} }{}
+\tentry{}{}{ \code{map}(v) }{}
+\end{tabular}
+\end{tabular}
+\end{tcolorbox}
+  \caption{Grammar for Place Expressions\\[1.5em]}
+  \label{syn:pl-expr}
+\end{figure}
+}
+
+\paragraph{Place Expressions}
+Rust introduces the concept of a \emph{place expression} as unique names for a memory object.
+Aliases are resolved by substituting the referenced place expressions.
+This allows them to be compared syntactically in Rust's type system to ensure that the same memory location is not (mutably) accessed simultaneously.
+This guarantees data race freedom.
+
+\Cref{syn:pl-expr} shows \Descend{}'s place expressions.
+The simplest place expression is a variable naming a region of memory.
+Projections $\code{.fst}$ or $\code{.snd}$ are applied to tuples referring to two non-overlapping regions of memory.
+The dereference-operator accesses the memory that a reference refers to.
+Single elements of an array are accessed by indexing.
+These place expressions exist in Rust as well.
+
+In \Descend, we introduce two additional place expressions: \emph{select}s and \emph{view}s.
+The select expression $p\llbracket e\code{.forall}(d)\rrbracket$ distributes the ownership of elements within the array place expression $p$ over each sub-execution resource in dimension $d$.
+This requires the execution resource (e.g., block) to consists of as many sub-execution resources (e.g., threads) as there are elements in the array.
+Each sub-execution resource takes ownership over one element, ensuring a safe concurrent array access.
+
+However, assigning ownership of single array elements to execution resources is very restricting.
+In practice, it is often required to take ownership over multiple array elements with a single thread.
+Similarly, the first element of an array would always be mapped to the first sub-execution resource.
+We require a way of reshaping which sub-execution resource takes ownership over which elements.
+To increase the flexibility of safe parallel memory accesses \Descend{} introduces \emph{views}.
+
+\bigskip
+
+\paragraph{Views}
+
+By applying a view $v$ to an array place expression $p$ with $p.v$, the underlying array is reshaped.
+The result of applying a view to an array is a view-array.
+View-arrays are very similar to ordinary arrays, but they are not guaranteed to be contiguous in memory.
+The reason for this is, that reshaping and reordering is not performed directly in memory.
+Instead, accesses to the resulting view-array are being transformed to create the impression of accessing data that has been reshaped and reordered in memory, while in fact, the original array's memory is being accessed.
+The memory layout of the original array remains the same.
+When generating code, views are compiled into indices following a process similar to the one taken in the Lift compiler~\cite{DBLP:conf/cgo/SteuwerRD17} and DPIA~\cite{DBLP:journals/corr/abs-1710-08332}.
+
+\Cref{syn:pl-expr} shows the basic views in \Descend{}, which can be combined to express more complex array accesses.
+View $\code{group}$ combines consecutive array elements into nested arrays of a given size.
+This enables assigning ownership of groups of elements to an execution resource by using the select operator.
+All groups must have the same size by requiring that  the group size perfectly divides the array size.
+$\code{take\_left}$ splits the array into two non-overlapping partial arrays at a given position and returns its left-hand side, while $\code{take\_right}$ returns the right-hand side of the split.\linebreak
+We ensure that the position of the split is within the size of the input array.
+These views enable programmers to select only a part of an array to work on and do something else with the other part or discard it.
+View $\code{transpose}$ transposes a two-dimensional array and $\code{reverse}$ reverses the order of elements.
+Finally, $\code{map}$ applies a view to each element of a multidimensional array.
+
+\begin{figure}[t]
+  \begin{minipage}{.37\textwidth}
+    \begin{DescendListing}[basicstyle=\ttfamily\scriptsize]
+for k in [4, 2, 1] {
+  sync(block);
+  split(X) k block.threads {
+    active => sched thread in active {
+      let myBorrow = &uniq
+        (*arr).group::<8/k>[[thread]];
+      (*myBorrow)[8/k-1] =
+          (*myBorrow)[8/k-1]
+        + (*myBorrow)[4/k-1];
+    },
+    inactive => { () }
+  }
+}
+    \end{DescendListing}
+  \end{minipage}
+  \begin{minipage}{.6\textwidth}
+    \includegraphics[width=.9\textwidth]{img/Upsweap.pdf}
+  \end{minipage}
+  \caption{Data owned by threads during the upsweep phase of scan algorithm.\\[1em]}
+  \label{fig:upsweep}
+\end{figure}
+
+\Cref{fig:upsweep}, shows an example of how views are used to control which thread in a block takes ownership over array elements during the upsweep phase of a work-efficient block-wide scan algorithm.
+The code on the left shows an implementation of the upsweep phase in \Descend{}.
+The graphic on the right shows the individual loop iterations from the bottom to the top. 
+The dark shaded areas show which array elements each thread has access to in each iteration.
+The arrows depict the data flow of the computation showing that each thread only performs reads and writes within the section of the array they have exclusive access to.
+
+In each iteration, the number of active threads is halved using the $\code{split}$ construct in line 3.
+Each active thread is assigned a group of elements using the $\code{group}$ view in line 6.
+The size of the group increases with each iteration.
+Two elements are added, and the last owned element is overwritten with the result (lines 7--9).
+In between each iteration a synchronization is required (line 2) as we perform the writes to a shared array and change the memory access pattern in each iteration.
+
+\begin{comment}
+In the first iteration, $\code{k}$ is equal to 4.
+Therefore, $\code{active}$ refers to all threads in the block, while $\code{inactive}$ refers to no threads.
+For each active thread, the view is applied in line 6 of the code.
+It groups every two elements of the $\code{input}$ array.
+The result is a two-dimensional array view.
+Then, each thread selects a group from the array view and performs its computation.
+The gray areas in the graphic show which elements of the array a thread has access to in each iteration.
+The arrows show the actual array elements that are being accessed.
+In the following iteration, the size $\code{k}$ of active threads is halved, such that $\code{active}$ contains only 2 threads, which take ownership over groups of 4 elements.
+Each thread reads the two previously written values adds them and writes them back.
+In the last iteration, only a single thread is active and performing the last addition to produce the result of the upsweep phase.
+\end{comment}
+
+This example shows, how views are used to distribute ownership of array elements over many threads, while guaranteeing that there is a clear separation of elements between execution resources.
+We can give this guarantee, because all views either group, remove or permute elements of an array and select always assigns threads to distinct elements.
+However, redistributing elements that were already distributed previously, may still introduce the possibility of multiple execution resources sharing ownership of elements.
+In order to guarantee that no memory location can be (mutably) accessed by more than one thread at the same time, we must guarantee that two place expressions aren't aliases for the same memory locations.
+In Rust, this guarantee is achieved through borrow checking.
+In \Descend{}, we have extended borrow checking to guarantee alias freedom between memory accessed by different execution resources.
+
+\subsection{Extended borrow checking in \Descend{}}
+Rust uses \emph{ownership}, \emph{borrowing}, and \emph{lifetimes} to statically guarantee that there are no data races, memory leaks, use-after-free errors and other memory related errors.
+Ownership ensures that there is no aliasing of memory objects, as on assignment to a new variable the value can only be accessed via the new variable.
+Attempts to access memory via the old variable lead to compile-time errors.
+
+As ownership alone is too restrictive, with borrowing, a restricted notion of aliasing is reintroduced into the language.
+The \emph{borrow checker} checks if a thread is allowed to create a (unique or shared) reference to a memory object, i.e., ``borrow'' it.
+Multiple shared references can be used at the same time, for reading only.
+A unique reference, guarantees that there are no other ways to access the same memory location.
+It is, therefore, safe to mutate the underlying memory.
+
+Finally, lifetimes ensure that the underlying memory of a reference hasn't been deallocated.
+Attempting to dereference when the memory might have been freed results in a compiler error.
+
+\paragraph{\Descend{}'s extended borrow checker}
+On the CPU, \Descend{} implements the same rules as Rust.
+On the GPU side, the ownership, and borrowing rules are extended and diverge from Rust.
+In Rust, ownership always belongs to a single thread.
+In \Descend{}, each execution resource, such as the grid or a block might take ownership of a memory object or create references, i.e., they might borrow.
+This means that collections of blocks or threads, as well as single threads, own and borrow memory objects, formally represented as place expressions.
+For a single thread to be able to write into a memory location by having exclusive access to it, the ownership and borrows must be \emph{narrowed} using \Descend{}'s hierarchical scheduling, selections and views.
+
+\emph{Narrowing} describes how ownership and borrows are refined when navigating the execution hierarchy from grid, to blocks and threads.
+For example, the ownership of an array by a grid is narrowed to the grid's blocks by the blocks collectively borrowing the array, each block a distinct part.
+This might be further narrowed to the block's threads.
+But narrowing can be violated:\\[-1.5em]
+\begin{DescendListing}
+fn kernel(arr: &uniq gpu.global [f32; 1024]) -[grd: gpu.Grid<X<32>,X<32>>]-> () {
+  sched(X) block in grd {
+    let in_borrow = &uniq *arr; // Narrowing violated
+    sched(X) thread in block {
+      let group = &uniq arr.group::<32>[[thread]]; // Narrowing violated
+      arr.group::<32>[[block]][[thread]]; } } }
+\end{DescendListing}
+
+In the example, the parameter $\code{arr}$ is owned by the grid.
+Attempting to borrow $\code{arr}$ in line 3 \emph{after} having scheduled the blocks of the grid violates narrowing, because each block in the grid would get unique write access to the entire array.
+
+Another narrowing violation is shown in line 5.
+The array is grouped so that there are as many groups as threads per block.
+Then each thread selects a group and borrows that group uniquely.
+However, the same selection is performed for each block, because there was no selection for $\code{block}$.
+Therefore, threads from different blocks would gain access to the same memory location.
+
+Line 7 shows correct narrowing.
+The array is grouped, and each block exclusively borrows a part of the array, before each thread in each block selects an element from it.
+
+\paragraph{Synchronization}
+\Descend's narrowing ensures that no two threads have mutable access to the same memory location.
+However, sometimes we do want to communicate with another thread via shared memory and then the other thread must be able to access the same memory location as well.
+We, therefore, need a way to allow an subsequent access by another thread while guaranteeing that this access cannot lead to a data race.
+By synchronizing threads at a barrier, we get the guarantee that all memory accesses before the barrier cannot conflict with memory accesses after the barrier.
+
+\begin{comment}
+\medskip
+In this section we discussed how \Descend addresses two challenges identified in \cref{sec:gpu-programming-difficult}: preventing data races and handling synchronizations.
+We will see in \Cref{sec:descend-types} that in the type system, \Descend tracks in an  environment of the typing judgement a mapping of which execution resource accessed which place expressions.
+This environment is used in the typing rules to perform the access safety checks, including correct narrowing.
+On a synchronization, we remove from the mapping the previous accesses of all threads in the block.
+In the next sections, we discuss how \Descend{} addresses the challenges of managing the heterogeneous system.
+\end{comment}
+
+\subsection{Shared Write Access through Atomics}
+\label{subsec:atomics}
+Up until this point, we have explained how \Descend{} enforces that two threads cannot (mutably) perform write access to the same memory location.
+However, this requirement is often too strict.
+Some applications, such as histograms, require threads to update memory locations concurrently.
+This is achieved without race conditions by using atomic read-modify-write (RMW) operations.
+
+\Descend{} supports a limited form of RMW operations via atomic types that resemble the atomic types in Rust:
+RMW operations are performed on values with atomic types that are referred to by shared references.
+This allows multiple threads to perform RMW operations through the same reference, without violating the extended borrow checking rules.
+For example, operation $\code{atomic\_fetch\_add\_u32}$ has the following function signature:\\[-2.5em]
+\begin{DescendListing}[numbers=none]
+atomic_fetch_add_u32<r:prv, m:mem>(atom_ref:&r shrd m AtomicU32, val:u32) -[t:gpu.Thread]-> u32
+\end{DescendListing}
+The function takes two arguments: a shared reference to a memory location and a value to add to the memory location.
+It must be called by a single thread and returns the value stored at the memory location before performing the RMW.
+
+In the current version of \Descend{} RMW operations are performed with a relaxed memory ordering, which does not impose constraints on other reads and writes.
+Implementations that require a more sophisticated use of atomics must resort to unsafe \Descend{} code, possibly using inlined CUDA code.
+In future work, we would like to investigate weak memory models and other memory orderings such as sequential consistency and acquire-release.
+
+\subsection{Escaping Restrictions Using Unsafe}
+\label{subsec:unsafe}
+For some algorithms, there is no statically known partitioning of the memory that \Descend{}'s views can express.
+Even when views can be used to express the general access pattern, indices and natural numbers must be statically guaranteed to be within array bounds or fulfill constraints such as a size being dividable by a specific number, e.g., the size of a $\code{group}$ view must divide the size of the grouped array.
+This can be a problem for such algorithms, for example for graph algorithms, where the nodes are often stored linearly in memory and referred to with an index that is read from memory or computed at runtime, depending on the shape of the graph.
+
+\Descend{} offers programmers a way to escape these restrictions, enabling them to write programs that would otherwise not be expressible in \Descend{} -- at the cost of introducing unsafe blocks of code.
+Preceding an expression with $\code{unsafe}$ tells the type checker to not perform extended borrow checking as well as constraint checks.
+For example, an optimized implementation of the Single-Source Shortest Path (SSSP) algorithm for GPU, chooses edges to process at runtime.
+After choosing the edge, the index of the edge's destination node $\code{dst}$ is read from memory and then the array $\code{node\_data}$ containing the data for all the graph's nodes is accessed as follows:\\[-2em]
+\begin{DescendListing}[numbers=none]
+unsafe &shrd (*(*graph).node_data)[dst]
+\end{DescendListing}
+Without $\code{unsafe}$ the above line would not type check, as $\code{dst}$ is not known statically when checking that the index is within the range of the array.
+The SSSP implementation uses a highly optimized worklist to track nodes whose distances must be (re-)computed.
+To avoid data races on this worklist while still being efficient, the implementation utilizes CUDA's weak memory model. 
+This use of atomics goes beyond what can currently be expressed in safe \Descend{}.
+Using $\code{unsafe}$ we can write inline CUDA code to call directly into the existing worklist CUDA library.
+$\code{Unsafe}$ code lacks the strong safety guarantees and must be used with caution, but it greatly increases the usefulness of \Descend while we gradually work on increasing the expressiveness of safe code.
+
+
+\subsection{Handling Separated Memories in \Descend{}}
+\label{subsubsec:mem-and-borrow}
+\paragraph{Tracking Memory Spaces}
+\Descend annotates all reference types with \emph{address spaces}.
+This is similarly done in CUDA, but CUDA does not have an address space for CPU pointers and generally does not strictly enforce their correct use.
+In \Descend, the $\CpuMem$ address space comprises values stored in the CPU stack and heap.
+For the GPU, we differentiate between the global $\GpuGlobal$, shared memories $\GpuShared$ and thread local memories $\GpuLocal$, which have separate address spaces.
+Using execution resources, \Descend enforces that references are only dereferenced in the correct execution context, such as preventing dereferencing a GPU reference on the CPU.
+\Descend also supports polymorphism over memory spaces, by introducing a type-level variable $m$ that is used in place for a concrete address space.
+
+\paragraph{Allocating Memory}
+Dynamic memory allocations, i.e., allocations on the CPU heap and in global GPU memory, are managed via unique smart pointers to ensure that they are freed safely without leaking memory.
+We call their types @-types, as they carry an annotation \emph{at} which address space they have been allocated.
+The memory is freed when the smart pointer is destroyed at the end of a scope.
+Therefore, our type $\code{T~@~cpu.mem}$ corresponds to $\code{Box\text{<}T\text{>}}$ in Rust.
+The following code shows how memory is allocated and initialized:\\[-2em]
+\begin{DescendListing}[]
+{ let cpu_array: [i32,n] @ cpu.mem = CpuHeap::new([0;n]);
+  { let global_array: [i32;n] @ gpu.global = GpuGlobal::alloc_copy(&cpu_array);
+  } // free global_array
+} // free heap_array
+\end{DescendListing}
+In the outer block, heap memory is allocated and initialized with an array of size $\code{n}$ filled with $0$.
+The smart pointer that manages the allocation is then stored in variable $\code{cpu\_array}$.
+In the inner block, GPU global memory is allocated for the data pointed to by $\code{heap\_array}$, the data is copied to the GPU and the resulting smart pointer is stored in $\code{global\_array}$.
+The type annotations shown here are optional, but show the information stored in the type.
+
+
+\subsection{Making Implicit Assumptions Explicit in \Descend{}}
+\label{subsubsec:exec-gpu-program}
+The CPU program is responsible for scheduling a GPU function for execution.
+In \Descend{}, this is a special function call, as in CUDA, where not just the function arguments are provided, but also the executing GPU grid is specified; here comprising 32 blocks with 32 threads each:\\[-2em]
+\begin{DescendListing}[numbers=none]
+scale_vec::<<<X<32>, X<32>>>>(&uniq vec);
+\end{DescendListing}
+In contrast to CUDA, in \Descend{}, the GPU function signature carries the information on which grid configuration is allowed to execute the function:\\[-2em]
+\begin{DescendListing}[numbers=none]
+fn scale_vec(vec: &uniq gpu.global [i32; 1024]) -[grid: gpu.grid<X<32>, X<32>>]-> ();
+\end{DescendListing}
+
+\Descend checks that the call site and the function declaration matches, to ensure that the assumptions about how the function is written and how it is invoked do not diverge.
+\Descend{} also supports polymorphism over grid sizes, allowing GPU functions to be written that, for example, launch as many threads as the size of the input array.
+In this case, the call site specifies the concrete values that are used for instantiating the grid size variables.
+
+The CPU thread waits for the GPU function call to finish, meaning there is an implicit synchronization of the GPU grid at the end of each GPU computation.
+
+\section{The Type System of \Descend{}}
+\label{sec:descend-types}
+In this section, we present the formal foundations of \Descend{}, including the syntax of terms and types, and the most important typing rules, explaining the formal reasoning behind ensuring safety.
+Our type system is based on the formalization of Rust's type system in Oxide~\cite{DBLP:journals/corr/abs-1903-00982}.
+A technical report with the full type system of \Descend{} is available at \url{https://descend-lang.org}.
+
+\subsection{Syntax of Terms}
+{%
+% \floatstyle{boxed}
+% \restylefloat{figure}
+\begin{figure}[t]
+  \footnotesize
+\begin{tcolorbox}[
+    colback=white,
+    sharp corners,boxrule=0.2mm,
+    left=-1em,right=0mm,top=0mm,bottom=0mm,
+    enlarge bottom by=-0.5cm,
+    % enlarge top by=-0.5cm,
+    ]
+\begin{tabular}{l | l}
+  \begin{tabular}[t]{ p{0.125cm} p{0.125cm} p{1.25cm} >{\em}r }
+\tentry{ t }{ \sdef }{}{ Term: }
+\tentry{}{}{ \underline{l} }{ literal }
+\tentry{}{}{ \ominus t~|~t~\oplus ~t }{ unary \& binary operation}
+\tentry{}{}{ p }{ place expression }
+\tentry{}{}{ \&r~\omega~p }{ reference/borrow }
+\tentry{}{}{ p = t }{ assigment }
+\tentry{}{}{ \fornat{n}{\eta..\eta}{t} }{ statif for-loop }
+\tentry{}{}{ \whilestmt{t}{t} }{ while-loop }
+\tentry{}{}{ \ifelsestmt{t}{t}{t} }{ if-else }
+\tentry{}{}{ t~;~t}{ sequence }
+\end{tabular}
+  &
+  \begin{tabular}[t]{ p{0.125cm} p{0.125cm} p{4.125cm} >{\em}r }
+\tentry{}{}{ {}^r \code{\{}~\overline{t}~\code{\}} }{ block }
+\tentry{}{}{ \code{let}~x: \delta = t }{ definition }
+\tentry{}{}{ \code{let}(e)~x: \delta }{ declaration }
+\tentry{}{}{ \app{f}{\overline{\tau}}{e}{\overline{p}} }{ function call }
+\tentry{}{}{ f\code{::}\langle \overline{\tau}\rangle \code{::}{\lll} \di, \di~;~\overline{r},~\overline{\delta}{\ggg} (\overline{t})}{ kernel call}
+\tentry{}{}{ \sched{d}{y}{e}{t} }{ schedule }
+\tentry{}{}{ \indep{d}{e}{\eta}{y}{t}{y}{t} }{ split exec }
+\tentry{}{}{ \code{sync}(e) }{ barrier }
+\tentry{}{}{ \code{unsafe}~t }{ unsafe }
+
+\tentry{ \omega }{ \sdef }{ \Shrd \opt \Uniq}{ Borrowing Mode }
+\end{tabular}
+\end{tabular}
+\end{tcolorbox}
+\caption{Formal syntax of \Descend{} terms\\[-1em]}
+\label{fig:syn-terms}
+\end{figure}
+}
+\Cref{fig:syn-terms} shows the formal syntax of terms in \Descend{}.
+The entries in the left column are mostly standard.
+Place expressions are terms that express memory accesses.
+We discussed the grammar of place expressions already in \cref{sec:place-expressions}.
+References are annotated to be either shared (the default) or unique.
+There exist two kinds of loops: a statically evaluated for-loop over a range of natural numbers and a generic while-loop.
+In the right column we start with blocks which introduce a new scope with a new lifetime under which to evaluate the nested terms.
+Let-bindings introduce and initialize new variables.
+New variables can also be declared without being initialized.
+In this case, the variable can be annotated with an execution resource to enable declaring variables for a sub-execution resource that is scheduled over at a later point.
+Function calls instantiate a polymorphic function $f$ with data types, lifetimes, memory spaces and statically evaluated natural numbers ($\overline{\tau}$), as well as an execution resource ($e$).
+Kernel calls look similar to function calls, but no execution resource is provided.
+Instead, we specify the dimensions of the grid that the kernel is executed with.
+The $\code{sched}$ operator takes a dimension and schedules the same computation over the sub-execution resources $y$ nested within execution resource $e$.
+The $\code{split}$ operator splits an execution resource into two independent parts along the given dimension at the provided position.
+Within the block of the $\code{split}$ each part can be referred to by the provided identifier and executes the given term.
+It then specifies the computation each part performs within its body.
+The barrier synchronization primitive synchronizes all threads within the provided execution resource.
+$\code{Unsafe}$ executes the nested term without the safety checks as explained in \cref{subsec:unsafe}.
+
+\subsection{Syntax of Types}
+{%
+% \floatstyle{boxed}
+% \restylefloat{figure}
+\begin{figure*}
+  \footnotesize
+\begin{tcolorbox}[
+    colback=white,
+    sharp corners,boxrule=0.2mm,
+    left=-1em,right=0mm,top=0mm,bottom=0mm,
+    enlarge bottom by=-0.5cm,
+    % enlarge top by=-0.5cm,
+    ]
+\centering
+\begin{tabular}[t]{ l | r }
+\begin{tabular}[t]{ p{0.125cm} p{0.125cm} p{3.25cm} >{\em}r }
+\tentry{ \kappa }{ \sdef }{ \Dty \opt \Rgn \opt \Mem \opt \Nat }{Kinds}
+\tentry{ \tylident }{ \sdef }{ \alpha \opt \mathcal{r} \opt \mathcal{m} \opt \mathcal{n} }{ Type identifier }
+
+\tentry{ \tau }{ \sdef }{ \delta \opt \rho \opt \mu \opt \eta }{ Types }
+\tentry{}{}{ \langle\overline{k:\kappa}\rangle\langle y:\varepsilon\rangle(\overline{e~\delta}) \xrightarrow{e} \delta, A}{ Function Types }
+
+\tentry{ \delta }{ \sdef }{}{ Data Types: }
+\tentry{}{}{ \alpha }{ type variable }
+\tentry{}{}{ \code{bool} \opt \code{int} \opt \code{float} \opt \code{AtomicU32}}{ base types }
+\tentry{}{}{ \TupleTy  }{ tuple type }
+\tentry{}{}{ \ArrayTy \opt \llbracket \delta; \eta \rrbracket  }{array \& view type }
+\tentry{}{}{ \&\rho ~\omega~\mu~\delta }{ reference type }
+\tentry{}{}{ \delta~@~\mu }{ at-type }
+
+\tentry{ \rho }{ \sdef }{\mathcal{r}~|~r}{ Lifetimes: }
+
+\tentry { \eta }{ \sdef }{n~|~ \underline{\eta}~|~\eta \oplus \eta}{ Natural Numbers: }
+\end{tabular}
+  &
+\begin{tabular}[t]{ p{0.125cm} p{0.125cm} p{1.75cm} >{\em}r }
+\tentry { \mu }{ \sdef }{ \CpuMem }{ Memory Spaces: }
+\tentry {}{}
+        { \GpuGlobal~|~\GpuShared~|~\GpuLocal}{}
+\tentry {}{}
+        { \mathcal{m} }{}
+
+\tentry { \varepsilon }{ \sdef }{ \code{Any} }{ Execution Resource Types: }
+\tentry {}{}{ \CpuThreadTy }{}
+\tentry {}{}{ \gridty{\di}{\di} }{}
+\tentry {}{}{ \blockgrpty{\di}{\di} }{}
+\tentry {}{}{ \blockty{\di} }{}
+\tentry {}{}{ \threadgrpty{\di} }{}
+\tentry {}{}{ \code{gpu.WarpGrp}~\eta }{}
+\tentry {}{}{ \code{gpu.Warp} }{}
+\tentry {}{}{ \code{gpu.Thread} }{}
+\end{tabular}
+\end{tabular}
+\end{tcolorbox}
+  \caption{Formal syntax of kinds and types in \Descend.}
+  \label{fig:syn-types}
+\end{figure*}
+}
+\Cref{fig:syn-types} shows the formal syntax of kinds and types.
+There are four different kinds: Data types, lifetimes, memory spaces and natural numbers.
+We syntactically distinguish between identifiers that have one of these kinds for readability.
+
+\Descend{} types are either one of these four kinds or function types.
+Function types are polymorphic over types and execution resources, beginning with a list of type identifiers each annotated with their kind, followed by the identifier for an execution resource, annotated with its execution resource type.
+Each parameter has a data type and belongs to an execution resource.
+Execution resource types ($\varepsilon$) are used to annotate which execution resources a concrete function can be instantiated with.
+The execution resource types model the runtime hierarchy and track dimensions of execution resources.
+This allows for writing functions that must fulfill certain requirements such as being executed by a full block.
+We currently restrict function parameters and return types to be data types, ruling out higher-order functions in \Descend, as it is not straightforward to implement higher-order functions efficiently on the GPU.
+The execution resource which must execute the function is written above the arrow.
+An access context $\accenvsym$ tracks which place expressions were accessed within the function in order to allow checking for data races.
+
+Data types contain the standard scalar and tuple types.
+Array and View types are indexed by their size which is tracked symbolically in the type.
+We model reference types similarly to Oxide.
+The lifetime $\rho$ keeps track of which place expression the reference possibly refers to.
+They can either be concrete lifetimes ($r$), or abstract lifetime variables ($\mathcal{r}$).
+Lifetimes have been formalized and explained in Oxide~\cite{DBLP:journals/corr/abs-1903-00982} and FR~\cite{DBLP:journals/toplas/Pearce21}.
+The reference is marked as either $\Uniq$ or $\Shrd$.
+We also track the memory space $\mu$ the reference points to.
+The possible memory address spaces are show on the right side of the figure.
+They represent the address spaces of the GPU memory hierarchy together with an abstract memory referred to by an identifier.
+At-types track which memory space their allocated value is stored in.
+
+
+
+\subsection{Typing Rules}
+\label{subsec:typing-rules}
+\begin{figure*}
+  \footnotesize
+\begin{mathpar}
+  \inferrule[T-Write-Local]
+  {
+    \text{isPlace}(p)\\\\
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      { t }{ \delta_t }{\Gamma'}{\accenvsym'}\\\\
+    \Gamma'(p) = (\delta_p, e_p) \\ e = e_p\\\\
+    \rrjudge{\Delta}{\Gamma'}{=}{\delta_t}{\delta_p}{\Gamma'}\\\\
+    \borrowjudge{\Gamma'}{\Uniq}{p}{\loan{\Uniq}{p}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {p~=~t}{\UnitTy}
+    {\Gamma'[p \mapsto \delta_t]}{\accenvsym'}
+  }
+
+  \inferrule[T-Write-SharedMem]
+  {
+    \neg\text{isPlace}(p)\\
+    y:\varepsilon \vdash e: \code{gpu.Thread}\\\\
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      { t }{ \delta_t }{\Gamma'}{\accenvsym'} \\\\
+    \pljudge{\Delta}{\Gamma_g}{\Gamma'}{y:\varepsilon}{e}{\Uniq}{p}{\delta_p}\\\\
+    \rrjudge{\Delta}{\Gamma'}{+}{\delta_t}{\delta_p}{\Gamma''}\\\\
+    \accjudge{\Delta}{\Gamma'}{\Theta}{y:\varepsilon}{e}{\accenvsym'}{\Uniq}{p}{\overline{{}^\Uniq p'}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {p~=~t}{\UnitTy}
+    {\Gamma''}{\accenvsym', \overline{\ell}}
+  }
+
+  \inferrule[T-Read-By-Copy]
+  {
+    \text{isPlace}(p)\\
+    \text{isCopyable}(\delta)\\\\
+    \pljudge{\Delta}{\Gamma_g}{\Gamma}{y:\varepsilon}{e}{\Shrd}{p}{\delta}\\\\
+    \accjudge{\Delta}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}{\Shrd}{p}{\overline{{}^\omega p'}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {p}{\delta}
+    {\Gamma}{\accenvsym}
+  }
+
+  \inferrule[T-Read-By-Move]
+  {
+    \text{isPlace}(p)\\
+    \neg\text{isCopyable}(\delta)\\\\
+    \pljudge{\Delta}{\Gamma_g}{\Gamma}{y:\varepsilon}{e}{\Uniq}{p}{\delta}\\\\
+    \accjudge{\Delta}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}{\Uniq}{p}{\loan{\Uniq}{p}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {p}{\delta}
+    {\Gamma[p \mapsto \delta^\dagger]}{\accenvsym}
+  }
+
+
+  \inferrule[T-Read-SharedMem]
+  {
+    \neg\text{isPlace}(p)\\
+    \text{isCopyable}(\delta)\\\\
+    \pljudge{\Delta}{\Gamma_g}{\Gamma}{y:\varepsilon}{e}{\Shrd}{p}{\delta}\\\\
+    \accjudge{\Delta}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}{\Shrd}{p}{\overline{{}^\omega p'}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {p}{\delta}
+    {\Gamma}{\accenvsym, \overline{\ell}}
+  }
+
+  \inferrule[T-Borrow]
+  {
+    \neg\text{isPlace}(p)\\
+    \Gamma(r) = \emptyset\\\\
+    \pljudge{\Delta}{\Gamma_g}{\Gamma}{y:\varepsilon}{e}{\omega}{p}{\delta},~\mu\\\\
+    \accjudge{\Delta}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}{\omega}{p}{\overline{{}^\omega p'}}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {\borrow{r}{\omega}{p}}{\refty{r}{\omega}{\mu}{\delta}}
+    {\Gamma}{\accenvsym}
+  }
+\end{mathpar}
+  \caption{Important typing rules in \Descend for accessing memory for writing and reading and performing the extended borrow safety checks.}
+  \label{fig:typing}
+\end{figure*}
+
+\paragraph{Typing judgement}
+The main typing judgement is fairly involved with multiple environments tracking various kinds of information.
+The typing judgement considers information about the kinds of type variables ($\Delta$), the types of local variables inside functions and active borrows ($\Gamma$), the execution resource $e$ executing the current term and possibly an execution resource identifier annotated with an execution resource type ($y: \varepsilon$).
+The access environment $\accenvsym$ tracks which place expressions have been accessed previously and are not safe to access without a synchronization.
+The typing judgement is flow-sensitive, meaning that the typing and access environments change during the typing process.
+For example when accessing an owned value we are not allowed to access it again (as it has been moved) and, therefore, it is marked as moved in the resulting typing environment.
+Therefore, the typing judgement looks like:
+\begin{equation*}
+  \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {t}{\delta}
+    {\Gamma'}{\accenvsym'}
+\end{equation*}
+This says that term $t$ has data type $\delta$ under the mentioned environments and produces the updated typing environment $\Gamma'$ and access environment $\accenvsym'$.
+For readability, we omit the global program environment $\progsym$ containing all function definitions, required for type checking function calls.
+
+\paragraph{Typing Rules}
+We focus on the important typing rules shown in \cref{fig:typing} and \ref{fig:typing2}.
+They give an overview of the most important features for avoiding data races and undefined behavior in \Descend{}.
+The rules are based on Oxide and adjusted to the additional requirements of GPUs with our execution resources and extended place expression syntax.
+
+The two rules in the first row type check the writing of a term $t$ to a place expression $p$. 
+The \textsc{T-Write-Local} applies if $p$ \emph{is a place}, meaning that it does not contain dereferencing operators.
+This implies that $p$ is in private memory and not a reference to addressable memory shared between threads, and, therefore, it is not possible to create a data race when writing to it.
+When type checking that the term $t$ has type $\delta_t$ we produce updated typing and access environments $\Gamma'$ and $\accenvsym'$.
+As $p$ must be a variable or projection we can directly access its type $\delta_p$ from the typing enviroment $\Gamma'$ rather than performing an additional type check.
+We enforce that only the execution resource owning a place writes to it by checking that $e$ and $e_p$ are equivalent.
+Next, we check that the types of the left $\delta_p$ and right $\delta_t$ side are equal except for their lifetimes, where we insist the that the lifetime in $\delta_t$ outlives the lifetime in $\delta_p$.
+Finally, the rule requires that the place expression must be borrowable uniquely under $\Gamma'$, i.e., after $t$ is evaluated.
+The right-hand side of the borrowing judgement shows the set of all aliases for $p$, annotated with their borrowing mode.
+In this case, since there are no references used in $p$, this set must not contain any place expressions besides $p$.
+After performing all these checks, in the conclusion, the typing environment is updated such that $p$ is assigned data type $\delta_t$, to reflect the change of the value in $p$.
+
+Rule \textsc{T-Write-SharedMem} specifies when a term $t$ can be written through a reference to memory that is possibly shared between threads.
+We must ensure that only singular threads write to a shared memory location.
+This is formalized by requiring the current execution resource to have execution resource type $\code{gpu.Thread}$.
+We perform the same type check for $t$ and also check the type of the place expression $p$.
+The place expression typing judgement $\vdash_\code{pl}$ assigns a type to every place expressions and makes sure that dereferencing does not violate the borrowing mode and that the value in $p$ was not moved out.
+Instead of performing a simple borrowing check, we perform the extended borrow check described before in section 3.
+This judgement makes sure that the ownership of $p$ can be narrowed to the current execution resource and that an access to the shared memory does not conflict with a previous access that was tracked in $\accenvsym'$.
+Like the normal borrow checking judgement, the extended borrow judgement specifies all existing aliases for $p$ (the place expression itself included) in $\overline{{}^{\omega} p'}$.
+When all checks succeed, all aliases are appended in the conclusion to the access environment to remember the shared memory access.
+
+There are three rules that check whether memory can be read through a place expression.
+Rule \textsc{T-Read-By-Copy} checks that the value in $p$ can be read if $p$ does not refer to shared memory and its value is copyable, as indicated by its data type.
+The extended borrow check makes sure that the ownership of $p$ can be narrowed to the current execution resource.
+The next rule, \textsc{T-Read-By-Move}, is very similar, however it applies when the value in $p$ is only movable.
+In this case the typing environment resulting from the type check is updated to reflect that the value of $p$ was moved out.
+The third rule \textsc{T-Read-SharedMem} checks whether it is possible to read from shared memory through references.
+If the rule succeeds, the access environment is updated to reflect that $p$ was accessed sharedly.
+The \textsc{T-Borrow} rule makes sure that only memory locations that are safe to access are borrowed.
+
+\begin{figure*}
+  \footnotesize
+\begin{mathpar}
+  \inferrule[T-Sync]
+  {
+    e \approx e'\\
+    \execjudge{\Delta}{y:\varepsilon}{e'}{\varepsilon'}\\\\
+    \varepsilon' \in \set{ \code{gpu.Block}~\di,~\code{gpu.Warp}}\\\\
+    \accenvsym' = \set{ {}^\omega \text{removeSelectAfter}(e', p) ~|~{}^\omega p \in \accenvsym}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y{:}\varepsilon}{e}{\accenvsym}{\code{sync}(e')}{\UnitTy}{\Gamma}{\accenvsym'}
+  }
+
+  \inferrule[T-Sched]
+  {
+    \execjudge{\Delta}{y:\varepsilon}{e'}{\varepsilon'}\\
+    e \approx e'\\
+    e'' = e.\code{forall}(d)\\\\
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e''}{\accenvsym}
+    {\set{t\subst{y'}{e''}}}{\UnitTy}
+    {\Gamma'}{\accenvsym'}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y{:}~\varepsilon}{e}{\accenvsym}
+    {\sched{d}{y'}{e'}{t}}{\UnitTy}
+    {\Gamma'}{\accenvsym'}
+  }
+
+  \inferrule[T-While]
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {t_c}{\Bool}
+    {{\Gamma}'}{\accenvsym'}\\
+    \typejudge{\Delta}{\Gamma_g}{{\Gamma}'}{\Theta}{y:\varepsilon}{e.\code{cond}}{\accenvsym'}
+      {t}{\UnitTy}
+    {{\Gamma}''}{\accenvsym''}\\\\
+    \typejudge{\Delta}{\Gamma_g}{{\Gamma}''}{\Theta}{y:\varepsilon}{e}{\accenvsym''}
+      {t_c}{\Bool}
+    {{\Gamma}''}{\accenvsym''}\\
+    \typejudge{\Delta}{\Gamma_g}{{\Gamma}''}{\Theta}{y:\varepsilon}{e.\code{cond}}{\accenvsym''}
+      {t}{\UnitTy}
+    {{\Gamma}''}{\accenvsym''}
+  }
+  {
+    \typejudge{\Delta}{\Gamma_g}{\Gamma}{\Theta}{y:\varepsilon}{e}{\accenvsym}
+      {\whilestmt{t_c}{t}}{\UnitTy}
+    {\Gamma''}{\accenvsym''}
+  }
+\end{mathpar}
+  \caption{Typing rules for barrier synchronization, scheduling computations over the execution hierarchy, and conditional execution with a while loop.}
+  \label{fig:typing2}
+\end{figure*}
+
+Rule \textsc{T-Sync} in \cref{fig:typing2} checks whether the synchronization of execution resource $e'$ can be performed under current execution resource $e$.
+If this is the case, it updates the access environment $\accenvsym'$ to reflect that accesses that would lead to a data race before the synchronization are safe again.
+
+Rule \textsc{T-Sched} shows the requirements for scheduling terms over sub-execution resources.
+The execution resource $e'$ to schedule over must be well-typed and equivalent to the current execution resource $e$.
+This execution resource is then quantified by a $\code{forall}(d)$ forming $e''$, to indicate that each sub-execution resource in the given dimension $d$ is scheduled over.
+Term $t$ with every $y'$ subsituted by $e''$ is then type checked under the same execution resource.
+
+Rule \textsc{T-While} shows how the system tracks that a term is evaluated within a conditional branch, in this case a loop body.
+First a standard check makes sure that the term containing the condition has type $\code{bool}$.
+Then the body of the loop is is checked under the current execution resource that is marked as being within a conditional branch (using the $e.\code{cond}$ notation), producing updated typing and access environments.
+Under these updated environments the loop condition and body are checked again, to reflect the fact that there are memory accesses happening in the loop body that may affect later iterations.
+
+
+\begin{comment}
+Many of the typing rules rely on the access safety judgement.
+We do not provide a formal definition here, but would like to point out the three steps that this check always follows:
+\begin{enumerate}
+  \item \emph{Narrowing check}: to check if the place expression is used uniquely by multiple execution resources.
+  This check ensures that each execution resource selects its own distinct part from it.
+  \item \emph{Access conflict check}: to check that using a place expression in an execution resource does not conflict with previous accesses by other execution resources that were stored in the access mapping environment
+  \item \emph{Borrow checking}: performs the unchanged borrow checking as in Rust and as formalized in Oxide.
+\end{enumerate}
+For this rule, the check succeeds if $p$ is sharedly accessible in the given environments.
+The function computes a set of all possible aliases $p_i$ which are all marked as $\Shrd$.
+The rule produces an updated access environment on the right side of the judgement in the conclusion.
+We record, that the current execution resource $e$ accesses the place expressions $p_i$ in a shared way by adding the mapping to $A$.
+
+\end{comment}
+\smallskip
+A technical report with the full type system of \Descend{} is available at \url{https://descend-lang.org}.
+
+% Evaluation
+\section{Code Generation and Evaluation}
+\label{sec:eval}
+In this section, we give a brief overview of \Descend{}'s code generator and show that our code generator translates programs written in \Descend's holistic programming model into CUDA programs using the kernel programming model, without sacrificing performance.
+
+\paragraph{Code Generation}
+The \Descend compiler translates \Descend code into CUDA C++ code.
+\Descend CPU functions are translated into C++.
+Functions that are run on the GPU are translated into CUDA kernels.
+Before generating code, we inline function calls for functions whose execution resources are not a full grid on the GPU or thread on the CPU, e.g. functions executed by GPU blocks.
+
+In CUDA's kernel programming model, all blocks and threads work concurrently.
+This is exactly what the nested schedule primitives in \Descend are expressing.
+Therefore, $\code{sched}$ does not appear in generated CUDA code, except for a scope that is introduced for its body.
+The bound execution resource variable is compiled into the equivalent index identifying the thread or block in CUDA.
+Block and thread indices are used when translating selections over place expressions into raw memory indices.
+When selecting from or indexing into a view, these indices are transformed to express the access patterns these views describe.
+This process is performed in reversed order, starting with the view that was applied last.
+Each view takes the previous index and transforms it until the resulting index expresses a combination of all views.
+The remaining \Descend syntax is translated straightforwardly, dropping static information that is not required in CUDA C++, such as memory annotations on reference types.
+
+\paragraph{Experimental Setup}
+We performed an experimental evaluation under CentOS 7 and CUDA 12.2.0 in combination with GCC 10.2.0 on an NVIDIA A100 and a 2080 Ti GPU.
+We compare seven common GPU benchmarks: transpose, reduction, scan, histogram, Jacobi SVD, a naive matrix multiplication and a more sophisticated general matrix multiplication.
+Each algorithm was implemented in \Descend from which we generated CUDA kernels that we call from handwritten benchmarking code.
+All experiments except Jacobi SVD were run for three different memory sizes: small, medium and large.
+We ran each benchmark 100 times, and report the median kernel runtimes.
+
+We additionally implemented an SSSP kernel by calling functions in an existing CUDA artifact.
+In order to get the artifact to run, we had to use CUDA 10.1.243 and GCC 8.3.0 with the 2080 Ti.
+We ran the benchmark 1000 times for each input graph.
+
+
+\begin{figure}[t]
+  \includegraphics[width=.88\textwidth]{img/plot.pdf}
+  \caption{Relative runtimes of benchmarks in CUDA and Descend. A higher bar indicates better performance.}
+  \label{fig:measures}
+\end{figure}
+
+\paragraph{Experimental Evaluation of Benchmarks.}
+\Cref{fig:measures} shows the performance comparison for our first seven benchmarks.
+The simple matrix \emph{Transpose} benchmark was shown in the introduction in \cref{lst:descend-transpose-example}.
+The \emph{Reduce} benchmark performs a block-wide tree-reduction. 
+The \emph{Scan} benchmark is based on the implementations by \citet{scan} and \citet{DBLP:conf/europar/PizzutiSD22} performing iterative upsweep and downsweep phases, as briefly discussed in \cref{sec:descend}, in which the memory that each thread owns changes between iterations and the amount of active threads decreases and then increases again.
+The \emph{Histogram} benchmark computes a GPU-wide histogram, showcasing the use of atomic RMW operations in \Descend{}.
+The \emph{JacobiSVD} benchmark is taken from the ArrayFire project \cite{Yalamanchili2015} and computes a block-wide single value decomposition of a matrix in shared memory.
+This benchmark is interesting because an earlier implementation of the benchmark contained a data race, as shown by \citet{DBLP:conf/icse/WuOZZ0Z20}, that \Descend{} successfully prevents from being introduced.
+The kernel is written for a fixed input size and executed by only a single block, which is why it was benchmarked using only one memory size.
+\emph{Matrix Multiply} is a naive implementation of matrix multiplication and \emph{GEMM} is a more complex tiled matrix multiplication, based on code generated from Lift \cite{DBLP:conf/cases/SteuwerRD16}, using shared memory.
+We believe that these benchmarks show that we are able to express a reasonably diverse set of applications in \Descend{}.
+
+
+
+\Cref{fig:measures} shows that the code generated from \Descend{} implementations is on par with CUDA code.
+The GEMM implementation of \Descend{} is consistently 20--30\% faster than the CUDA implementation.
+We closely investigated the differences between the generated \Descend{} code and the CUDA version.
+While both versions implement the exact same tiling optimization and access memory in exactly the same way, the differences are due to the fact that loops are unrolled manually in the CUDA version whereas \Descend{} generates structured loops, with statically known loop bounds, that the underlying CUDA compiler can decide to unroll or not.
+
+\begin{figure}[t]
+  \includegraphics[width=.88\textwidth]{img/sssp.pdf}
+  \caption{Relative runtimes of SSSP in CUDA and Descend. A higher bar indicates better performance.}
+  \label{fig:sssp}
+\end{figure}
+
+
+\smallskip
+\begin{comment}
+\paragraph{Experimental Results}
+\Cref{fig:measures} shows the relative median runtimes of \Descend compared to handwritten CUDA code.
+It shows that \Descend and CUDA perform equally well for all benchmarks and sizes with performance difference of less than $3\%$.
+We see that \Descend is expressive enough to write programs that achieve performance on-par with the handwritten CUDA implementations, while providing strong safety guarantees and catching bugs as demonstrated in \cref{sec:gpu-programming-difficult}.
+\end{comment}
+\textit{Experimental Evaluation of the SSSP Application}
+Graph algorithms such as the single-source shortest path (SSSP) are challenging to express in \Descend{}, as we already described in \cref{subsec:unsafe}.
+An efficient worklist implementation by \citet{Wang2021} is long and complex with almost 2k lines of code and exploiting advanced features of CUDA's weak memory model.
+Nonetheless, we implemented the SSSP algorithm in \Descend{} making direct use of the CUDA worklist implementation.
+For that we introduce $10$ helper functions performing operations on the worklist and abstracting the use of other third party CUDA libraries such as CUB.
+Within these helper functions we use unsafe inline CUDA code to call the existing CUDA implementations, which gave us a quick way of introducing a \Descend{} API for them.
+We also had to use $\code{unsafe}$ every time (14 times) we access graph data, because the indices used for the accesses are read from memory at runtime.
+This approach is helpful for implementing complex programs that we can express in safe \Descend{} in order to translate them gradually or for applications such as SSSP for which safe \Descend{} is not expressive enough, yet.
+Additionally, the algorithm makes use of warp-level shuffle instructions that we introduced in safe \Descend{}.
+\Cref{fig:sssp} shows that the code we generate from our \Descend{} implementation has performance on par with the reference CUDA implementation.
+
+
+\section{Related Work}
+\label{sec:relatedWork}
+
+\paragraph{Unsafe GPU Programming Systems}
+CUDA~\cite{DBLP:journals/queue/NickollsBGS08} from NVIDIA is most likely the most popular GPU programming language.
+OpenCL~\cite{opencl} and more recently SYCL~\cite{sycl} are vendor independent languages following very similar designs, but lacking some of the more recent features of CUDA.
+
+Many language bindings for other languages have been built, such as PyCUDA/PyOpenCL~\cite{DBLP:journals/pc/KlocknerPLCIF12} in Python, exposing the CUDA programming model unchanged.
+For Rust, \citet{DBLP:conf/ipps/HolkPCLM13} propose an initial solution to express GPU programs.
+However, GPU programs written in this extension are inherently unsafe.
+GPU kernels are written in unrestricted Rust, which can result in programs that cannot be compiled for the GPU.
+Furthermore, GPU kernels are implemented in the traditional CUDA kernel programming model, maintaining all the problems identified in \cref{sec:gpu-programming-difficult}.
+For example, dynamic indexing is the only way of expressing data accesses for different threads and therefore depends on dynamically determined thread indices.
+In order to guarantee memory safety, thisc would require dynamic index out-of-bounds checks, which are explicitly disabled for GPU kernels.
+Additionally, the GPU memory hierarchy is not exposed, meaning that there is no way to use the fast on-chip shared memory.
+
+X10 \cite{workshop/x10/IBM11} is a parallel research language following the Asynchronous Partitioned Global Address Space (APGAS) programming model.
+It was designed without a specific focus on GPU computing, with a broader goal to facilitate parallel distributed programming on heterogeneous hardware.
+The fundamental concept in APGAS is a \emph{place} which contains activities that operate on state.
+Places are mapped to hardware, e.g. an x86 core, a cluster node or a GPU.
+Places are hierarchically structured, and have access to a copy of their ancestor's memory.
+For GPU programs in X10, a place that is mapped to a GPU creates places for each block which create places that are mapped to each thread.
+This leads to a holistic top-down hierarchical description of a GPU program, similar to \Descend{}.
+However, in contrast to \Descend{}, X10 focuses on a general programming model that works across distributed heterogeneous hardware.
+In \Descend{}, we specifically focus on providing safety for GPU programming, which X10 does not provide.
+For example, X10 allows explicit indexing from threads into shared memory locations, which may lead to data races.
+
+Sequoia \cite{fatahalian2006sequoia} is a programming model focusing on abstractly exposing memory hierarchies, enabling programmers to write portable programs that still focus on the different levels of the memory hierarchy.
+Communication between memory modules is described in an abstract way, such that it is possible to generate different implementations for it.
+Parallel computations are expressed in the form of independent tasks that work on their own isolated address spaces.
+Tasks are mapped to the hardware using predefined parallel mapping constructs and data is passed from calling tasks to subtasks, thereby forming an execution and memory hierarchy.
+Tasks can have multiple implementations to choose from for the different contexts in which they are being used.
+While Sequoia was originally developed for the Cell processor, it supports compiling to CUDA \cite{bauer2010sequoia++}, but to generate efficient programs using shared memory, tasks operate on shared memory, enabling the possibility of data races and making Sequoia unsafe.
+
+
+
+\paragraph{Safe GPU Programming Systems}
+There is a group of array languages with the goal of providing safe abstractions for high-performance GPU programming following functional ideas.
+In these languages, programs are safe by construction and are based on predefined patterns such as \emph{map} and \emph{reduce} to describe computations at a high level, from which they generate low-level GPU code.
+
+Futhark~\cite{DBLP:conf/pldi/HenriksenSEHO17} is a functional Haskell-like language that focuses on expressing practical high-performance GPU programs in a functional style.
+Because of its functional nature, Futhark programs do not express memory accesses explicitly.
+The compiler lowers the functional programs into different IRs, introducing explicit memory accesses and imperative programming constructs.
+The IRs are used to determine access patterns and other optimizations.
+
+Lift~\cite{DBLP:conf/cgo/SteuwerRD17} and its spiritual successor Rise~\cite{DBLP:journals/pacmpl/HagedornLKQGS20,DBLP:journals/corr/abs-2201-03611} consist of a high- and low-level functional language.
+High-level programs are automatically rewritten into equivalent low-level programs that specify how to map computation to the GPU, enabling automatic exploration of implementations for high-level programs.
+Low-level programs are then executed to find the fastest performing one.
+Accelerate~\cite{DBLP:conf/icfp/McDonellCKL13} enables expressing and executing parallel programs, including for the GPU, from within Haskell programs.
+
+In comparison to all these approaches, \Descend{} is more explicit about memory accesses, giving the user control about which thread accesses which memory location at which time.
+
+\paragraph{GPU Verification Tools}
+One of the main goals of \Descend is to avoid data races.
+There is previous work on static data race detection tools for GPUs like GPUVerify~\cite{DBLP:conf/oopsla/BettsCDQT12} and Faial~\cite{DBLP:conf/cav/CogumbreiroLRZ21}.
+These tools analyze CUDA C code attempting to detect data races.
+Of course, the analyzed code may still contain other problems that we mentioned in this paper and \Descend is capable to prevent statically.
+GKLEE~\cite{DBLP:conf/ppopp/LiLSGGR12} and SESA~\cite{DBLP:conf/sc/LiLG14} perform symbolic execution to find correctness and performance problems within GPU kernels.
+
+\paragraph{Formalizations of Rust}
+Rust's ownership, borrowing and lifetimes have been formalized in the FR Language~\cite{DBLP:journals/toplas/Pearce21} and Oxide~\cite{DBLP:journals/corr/abs-1903-00982}.
+FR focuses on the core ideas of borrowing and lifetimes, and the way they are implemented for current Rust versions, while maintaining a maximally simple language with possible extensions.
+Some practical features of Rust are not modelled in FR.
+Oxide, which was a major basis for our work, focuses on borrowing rules of a new version of the borrow checker that is currently in development.
+Furthermore, it formalizes other language features of Rust, such as polymorphic functions, slices, which can be seen as an early inspiration for \Descend's views and loops which are required for most practical applications.
+Like Rust, these languages are not able to target GPUs.
+
+\section{Conclusion}
+\label{sec:conclusion}
+GPU programming is notoriously challenging, but with \Descend, we have demonstrated that it is possible to achieve the same performance as CUDA while guaranteeing memory safety and statically rejecting programs with data races and incorrect synchronizations.
+\Descend{} assists programmers in managing CPU and GPU memory and enforcing previously implicit assumptions about the parallel execution of GPU code.
+\Descend extends Rust's formal type system with \emph{execution resource} and \emph{views} to implement an \emph{extended borrow checking} for ensuring safe memory accesses on the GPU.
+
+Our evaluation shows that \Descend{} is expressive enough to write programs that achieve performance on-par with the handwritten CUDA implementations while providing strong static safety guarantees.
+Using limited $\code{unsafe}$ code expands the expressiveness to applications for which guaranteeing safety statically is currently not possible. 
+
+Of course, \Descend{} is only one point in the design space of GPU programming languages.
+It uniquely combines the imperative nature and low-level control of languages like CUDA and OpenCL with the safety of higher level languages like Rise and Futhark.
+We believe that this is a particularly interesting point in the design space that deserves more attention, as we can (largely) maintain the familiar imperative programming style that gives programmers low-level control, while guaranteeing data race freedom.
+We hope that \Descend{} will spark interest in exploring alternative GPU programming language designs.
+
+
+%%
+%% The acknowledgments section is defined using the "acks" environment
+%% (and NOT an unnumbered section). This ensures the proper
+%% identification of the section in the article metadata, and the
+%% consistent spelling of the heading.
+%\begin{acks}
+%To Robert, for the bagels and explaining CMYK and color spaces.
+%\end{acks}
+
+%%
+%% The next two lines define the bibliography style to be used, and
+%% the bibliography file.
+% \bibliographystyle{ACM-Reference-Format}
+\bibliography{bib}
+
+%%
+%% If your work has an appendix, this is the place to put it.
+%\appendix
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-manuscript.tex'.
