@@ -2,9 +2,22 @@
 
 #let Descend = text(style: "italic")[Descend#sym.space.thin]
 
+#let fig(..args) = {
+  figure(
+    kind: "figure",
+    supplement: [Figure],
+    //gap: 0.5em,
+    ..args
+  )
+}
+
 #let code(content) = {
   show raw: set text(font: mathTtFont, size: 9pt, weight: "regular")
-  content
+  if content.func() == text {
+    raw(content.text)
+  } else {
+    content
+  }
 }
 
 #let codeListing(
@@ -485,7 +498,7 @@ error: mismatched types
   |  scale_vec<<<X<1>, X<SIZE>>>>(d_vec);
   |                               ^^^^^ expected `[f64; SIZE]`, found `[f64; ELEMS]`
 ```)
-#v(.5em)
+#v(.9em)
 
 #parIndent We will see in @sec:descend, that all functions are annotated with an execution resource describing how the function expects to be executed.
 This makes assumptions explicit.
@@ -512,7 +525,8 @@ For this, we need to be able to syntactically compare execution resources, which
 
 #[
 #show figure: set place(clearance: 1em)
-#figure(placement: bottom,
+#fig(
+placement: bottom,
 caption: [Grammar for Execution Resources and Dimensions],
   {
     set text(size: 9pt)
@@ -674,7 +688,7 @@ _3)_ they keep track of dimensions and sizes that are used in the code generatio
 == Place Expressions and Views <sec:place-expressions>
 To reason about memory locations and safe memory accesses we define _Place Expressions_ and _Views_.
 
-#figure(placement: top,
+#fig(placement: top,
 caption: [Grammar for Place Expressions],
   {
     set text(size: 9pt)
@@ -771,16 +785,17 @@ View `group` combines consecutive array elements into nested arrays of a given s
 This enables assigning ownership of groups of elements to an execution resource by using the select operator.
 All groups must have the same size by requiring that  the group size perfectly divides the array size.
 `take_left` splits the array into two non-overlapping partial arrays at a given position and returns its left-hand side, while `take_right` returns the right-hand side of the split.
+#pagebreak()
 We ensure that the position of the split is within the size of the input array.
 These views enable programmers to select only a part of an array to work on and do something else with the other part or discard it.
 View `transpose` transposes a two-dimensional array and `reverse` reverses the order of elements.
 Finally, `map` applies a view to each element of a multidimensional array.
 
 
-#figure(placement: top,
+#fig(placement: top,
 caption: [Data owned by threads during the upsweep phase of scan algorithm],
   grid( columns: (40%, 60%),
-        align: (horizon+right, top+right),
+        align: (horizon+right, top+left),
         gutter: 10pt,
         {
   descendCode(text-style: (font: ttFont, size: 7pt, spacing: 100%), ```rust
@@ -799,7 +814,7 @@ for k in [4, 2, 1] {
 }
 ```)
         },
-    image("sample-descend-pldi-paper/img/Upsweap.svg")
+    image(width: 90%, "sample-descend-pldi-paper/img/Upsweap.svg")
   )
 ) <fig:upsweep>
 
@@ -848,6 +863,7 @@ _Narrowing_ describes how ownership and borrows are refined when navigating the 
 For example, the ownership of an array by a grid is narrowed to the grid's blocks by the blocks collectively borrowing the array, each block a distinct part.
 This might be further narrowed to the block's threads.
 But narrowing can be violated:
+#v(4pt)
 #descendCode(```rust
 fn kernel(arr: &uniq gpu.global [f32; 1024]) -[grd: gpu.Grid<X<32>,X<32>>]-> () {
   sched(X) block in grd {
@@ -855,7 +871,7 @@ fn kernel(arr: &uniq gpu.global [f32; 1024]) -[grd: gpu.Grid<X<32>,X<32>>]-> () 
     sched(X) thread in block {
       let group = &uniq arr.group::<32>[[thread]]; // Narrowing violated
       arr.group::<32>[[block]][[thread]]; } } }
-```)#v(1em)
+```)#v(.75em)
 
 #parIndent In the example, the parameter `arr` is owned by the grid.
 Attempting to borrow `arr` in line 3 _after_ having scheduled the blocks of the grid violates narrowing, because each block in the grid would get unique write access to the entire array.
@@ -885,6 +901,7 @@ This is achieved without race conditions by using atomic read-modify-write (RMW)
 RMW operations are performed on values with atomic types that are referred to by shared references.
 This allows multiple threads to perform RMW operations through the same reference, without violating the extended borrow checking rules.
 For example, operation `atomic_fetch_add_u32` has the following function signature:
+#v(-3pt)
 #descendCode(numbering: false, ```rust
 atomic_fetch_add_u32<r:prv, m:mem>(atom_ref:&r shrd m AtomicU32, val:u32) -[t:gpu.Thread]-> u32
 ```)#v(1em)
@@ -905,6 +922,7 @@ This can be a problem for such algorithms, for example for graph algorithms, whe
 Preceding an expression with `unsafe` tells the type checker to not perform extended borrow checking as well as constraint checks.
 For example, an optimized implementation of the Single-Source Shortest Path (SSSP) algorithm for GPU, chooses edges to process at runtime.
 After choosing the edge, the index of the edge's destination node `dst` is read from memory and then the array `node_data` containing the data for all the graph's nodes is accessed as follows:
+#v(2pt)
 #descendCode(numbering: false, ```rust
 unsafe &shrd (*(*graph).node_data)[dst]
 ```)#v(1em)
@@ -917,7 +935,8 @@ Using `unsafe` we can write inline CUDA code to call directly into the existing 
 `Unsafe` code lacks the strong safety guarantees and must be used with caution, but it greatly increases the usefulness of #Descend while we gradually work on increasing the expressiveness of safe code.
 
 == Handling Separated Memories in #Descend <subsubsec:mem-and-borrow>
-#paragraph[Tracking Memory Spaces]
+#v(-1.25em)
+#parIndent #paragraph[Tracking Memory Spaces]
 #Descend annotates all reference types with _address spaces_.
 This is similarly done in CUDA, but CUDA does not have an address space for CPU pointers and generally does not strictly enforce their correct use.
 In #Descend, the `cpu.mem` address space comprises values stored in the CPU stack and heap.
@@ -931,6 +950,7 @@ We call their types \@-types, as they carry an annotation _at_ which address spa
 The memory is freed when the smart pointer is destroyed at the end of a scope.
 Therefore, our type `T @ cpu.mem` corresponds to `Box<T>` in Rust.
 The following code shows how memory is allocated and initialized:
+#v(2pt)
 #descendCode(```rust
 { let cpu_array: [i32,n] @ cpu.mem = CpuHeap::new([0;n]);
   { let global_array: [i32;n] @ gpu.global = GpuGlobal::alloc_copy(&cpu_array);
@@ -946,11 +966,13 @@ The type annotations shown here are optional, but show the information stored in
 == Making Implicit Assumptions Explicit in #Descend <subsubsec:exec-gpu-program>
 The CPU program is responsible for scheduling a GPU function for execution.
 In #Descend, this is a special function call, as in CUDA, where not just the function arguments are provided, but also the executing GPU grid is specified; here comprising 32 blocks with 32 threads each:
+#v(2pt)
 #descendCode(numbering: false, ```rust
 scale_vec::<<<X<32>, X<32>>>>(&uniq vec);
 ```)#v(1em)
 
 #parIndent In contrast to CUDA, in #Descend, the GPU function signature carries the information on which grid configuration is allowed to execute the function:
+#v(2pt)
 #descendCode(numbering: false, ```rust
 fn scale_vec(vec: &uniq gpu.global [i32; 1024]) -[grid: gpu.grid<X<32>, X<32>>]-> ();
 ```)#v(1em)
@@ -967,7 +989,7 @@ In this section, we present the formal foundations of #Descend, including the sy
 Our type system is based on the formalization of Rust's type system in Oxide~#cite(label("DBLP:journals/corr/abs-1903-00982")).
 A technical report with the full type system of #Descend is available at https://descend-lang.org.
 
-== Syntax of types
+== Syntax of Terms
 
 #let Set(x) = ${space #x space}$
 #let unop(x) = $minus.o #x$
@@ -979,13 +1001,16 @@ A technical report with the full type system of #Descend is available at https:/
 #let whileStmt(c, body) = $#`while` space #c space #Set(body)$
 #let ifelseStmt(c, x, y) = $#`if` space #c space #Set(x) #`else` #Set(y)$
 
-#figure(placement: top,
+#[
+#show figure: set place(clearance: 1.5em)
+#fig(placement: top,
+gap: .5em,
 caption: [Formal syntax of #Descend terms],
   {
     set text(size: 9pt)
     block(width: 100%,
           stroke: black + 0.2mm,
-          inset: 6pt,
+          inset: 5pt,
       grid(
         columns: (1fr, 1fr),
         align: (top+right, top+right),
@@ -1038,6 +1063,58 @@ caption: [Formal syntax of #Descend terms],
     )
   }
 ) <fig:syn-terms>
+]
+
+
+@fig:syn-terms shows the formal syntax of terms in #Descend.
+The entries in the left column are mostly standard.
+Place expressions are terms that express memory accesses.
+We discussed the grammar of place expressions already in @sec:place-expressions.
+References are annotated to be either shared (the default) or unique.
+There exist two kinds of loops: a statically evaluated for-loop over a range of natural numbers and a generic while-loop.
+In the right column we start with blocks which introduce a new scope with a new lifetime under which to evaluate the nested terms.
+Let-bindings introduce and initialize new variables.
+New variables can also be declared without being initialized.
+In this case, the variable can be annotated with an execution resource to enable declaring variables for a sub-execution resource that is scheduled over at a later point.
+Function calls instantiate a polymorphic function $f$ with data types, lifetimes, memory spaces and statically evaluated natural numbers ($overline(tau)$), as well as an execution resource ($e$).
+Kernel calls look similar to function calls, but no execution resource is provided.
+Instead, we specify the dimensions of the grid that the kernel is executed with.
+The #code[sched] operator takes a dimension and schedules the same computation over the sub-execution resources $y$ nested within execution resource $e$.
+The #code[split] operator splits an execution resource into two independent parts along the given dimension at the provided position.
+Within the block of the #code[split] each part can be referred to by the provided identifier and executes the given term.
+It then specifies the computation each part performs within its body.
+The barrier synchronization primitive synchronizes all threads within the provided execution resource.
+#code[Unsafe] executes the nested term without the safety checks as explained in @subsec:unsafe.
+
+
+== Syntax of Types
+
+//@fig:syn-types
+shows the formal syntax of kinds and types.
+There are four different kinds: Data types, lifetimes, memory spaces and natural numbers.
+We syntactically distinguish between identifiers that have one of these kinds for readability.
+
+#Descend types are either one of these four kinds or function types.
+Function types are polymorphic over types and execution resources, beginning with a list of type identifiers each annotated with their kind, followed by the identifier for an execution resource, annotated with its execution resource type.
+Each parameter has a data type and belongs to an execution resource.
+Execution resource types ($epsilon$) are used to annotate which execution resources a concrete function can be instantiated with.
+The execution resource types model the runtime hierarchy and track dimensions of execution resources.
+This allows for writing functions that must fulfill certain requirements such as being executed by a full block.
+We currently restrict function parameters and return types to be data types, ruling out higher-order functions in #Descend, as it is not straightforward to implement higher-order functions efficiently on the GPU.
+The execution resource which must execute the function is written above the arrow.
+An access context $A$ tracks which place expressions were accessed within the function in order to allow checking for data races.
+
+Data types contain the standard scalar and tuple types.
+Array and View types are indexed by their size which is tracked symbolically in the type.
+We model reference types similarly to Oxide.
+The lifetime $rho$ keeps track of which place expression the reference possibly refers to.
+They can either be concrete lifetimes ($r$), or abstract lifetime variables ($r$).
+Lifetimes have been formalized and explained in Oxide #cite{DBLP:journals/corr/abs-1903-00982} and FR #cite{DBLP:journals/toplas/Pearce21}.
+The reference is marked as either `uniq` or `shrd`.
+We also track the memory space $mu$ the reference points to.
+The possible memory address spaces are show on the right side of the figure.
+They represent the address spaces of the GPU memory hierarchy together with an abstract memory referred to by an identifier.
+At-types track which memory space their allocated value is stored in.
 
 = Code Generation and Evaluation <sec:eval>
 
