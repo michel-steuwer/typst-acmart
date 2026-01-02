@@ -755,6 +755,8 @@ Similarly, the first element of an array would always be mapped to the first sub
 We require a way of reshaping which sub-execution resource takes ownership over which elements.
 To increase the flexibility of safe parallel memory accesses #Descend introduces _views_.
 
+#smallskip
+
 #paragraph[Views]
 By applying a view $v$ to an array place expression $p$ with $p.v$, the underlying array is reshaped.
 The result of applying a view to an array is a view-array.

@@ -4,7 +4,7 @@
 #let mathFont = "Libertinus Math"
 #let mathTtFont = "Latin Modern Mono"
 
-#let bigskipamount = 12pt
+#let bigskipamount = 24pt
 #let medskipamount = bigskipamount / 2
 #let smallskipamount = medskipamount / 2
 
@@ -18,7 +18,9 @@
 #let parIndentAmount = 9.5pt
 #let parIndent = h(parIndentAmount)
 
-#let smallskip = v(6pt)
+#let smallskip = v(smallskipamount)
+#let mediumskip = v(medskipamount)
+#let bigskip = v(bigskipamount)
 
 #let paragraph(title) = {
   v(0.8em)
